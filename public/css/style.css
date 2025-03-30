@@ -1,0 +1,128 @@
+/* public/css/style.css */
+
+/* Basic resets / container styles. 
+   This file is referenced by both index.php and login.php. */
+
+   body {
+    margin: 0; 
+    padding: 0;
+    background: #f4f4f4;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 25px 30px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 6px;
+}
+
+.login-container {
+    max-width: 300px;
+    margin: 100px auto;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 5px;
+}
+
+header {
+    margin-bottom: 30px;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 20px 0;
+}
+
+h1, h2 {
+    margin-top: 0;
+    color: #444;
+}
+
+.error {
+    color: red;
+    text-align: center;
+}
+
+label {
+    margin-bottom: 0.5em;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 1em;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+button {
+    background: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 16px;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+/* Index page extras */
+.top-links a {
+    text-decoration: none;
+    color: #007BFF;
+    margin-left: 15px;
+}
+.top-links a:hover {
+    text-decoration: underline;
+}
+
+.module-card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 10px 0;
+    background: #fafafa;
+}
+.module-card.completed {
+    color: #999;
+    background: #f0f0f0;
+    border-color: #ddd;
+}
+
+.req-list {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+.req-list li {
+    margin-bottom: 5px;
+}
+
+.form-inline {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.term-block {
+    margin-bottom: 40px;
+}
+
+.credit-summary {
+    margin: 10px 0 0 0;
+}
+.credit-summary p {
+    margin: 5px 0;
+}
+.info-line {
+    margin: 5px 0;
+}

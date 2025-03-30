@@ -1,0 +1,5 @@
+# -- public/app/.htaccess --
+# Deny *all* direct access to this folder if someone tries
+# to bypass the top-level .htaccess. The user should never
+# be able to browse these files.
+Require all denied

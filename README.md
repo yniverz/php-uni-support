@@ -23,11 +23,9 @@ All data (user accounts and module information) is stored in JSON files statical
 - PHP 7.0 or higher
 
 ### Installation Steps
-- After cloning the repository, you can either just copy the `public` folder to your web server’s document root
-- Or you can add the `public` folder/path to your existing web server setup so that it can be accessed from the browser.
-
-## Important Notes
-- Make sure to copy and place the `.htaccess` files in the correct directories. They are essential for security.
+- This repository is ready to use in a web server environment.
+- Clone or download the repository to your local machine or directly to your public directory.
+- **IMPORTANT**: Make sure to use a web server that supports PHP and `.htaccess` files! Otherwise, the application may not work as expected and could expose sensitive information.
 
 ---
 

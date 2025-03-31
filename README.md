@@ -46,3 +46,4 @@ All data (user accounts and module information) is stored in JSON files statical
 
 ### iCal Integration
 - You can add the requirements with dates as events to your calendar using the iCal path `/calendar.ics?username=USERNAME&password=PASSWORD`.
+- Just put this link (with your domain and username/password) into your calendar app and it will automatically add the events to your calendar.

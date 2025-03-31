@@ -19,3 +19,6 @@ DirectoryIndex index.php
     Order Allow,Deny
     Deny from all
 </FilesMatch>
+
+RewriteEngine On
+RewriteRule ^calendar\.ics$ calendar.ics.php [L]

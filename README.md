@@ -43,3 +43,6 @@ All data (user accounts and module information) is stored in JSON files statical
 - Users can mark requirements as completed.
 - Users can view their progress in terms of completed requirements and credits earned.
 - Users can delete modules and requirements.
+
+### iCal Integration
+- You can add the requirements with dates as events to your calendar using the iCal path `/calendar.ics?username=USERNAME&password=PASSWORD`.

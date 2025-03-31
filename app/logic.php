@@ -75,6 +75,30 @@ if ($isEditMode) {
         exit;
     }
 
+    // Reassign module to different term
+    if (isset($_POST['reassign_module'])) {
+        $moduleIndex = (int)($_POST['moduleIndexTerm'] ?? -1);
+        $newTerm     = (int)($_POST['newTerm'] ?? 1);
+        if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
+            $data['modules'][$moduleIndex]['term'] = $newTerm;
+            sortModules($data['modules']);
+            saveData($data, $jsonFile);
+        }
+        header("Location: index.php?mode=edit");
+        exit;
+    }
+
+    // Delete module
+    if (isset($_POST['delete_module'])) {
+        $moduleIndex = (int)($_POST['moduleIndex'] ?? -1);
+        if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
+            array_splice($data['modules'], $moduleIndex, 1);
+            saveData($data, $jsonFile);
+        }
+        header("Location: index.php?mode=edit");
+        exit;
+    }
+
     // Add a new sub-requirement
     if (isset($_POST['add_requirement'])) {
         $moduleIndex = (int)($_POST['moduleIndex'] ?? -1);
@@ -92,19 +116,6 @@ if ($isEditMode) {
                 $newRequirement['date'] = $date;
             }
             $data['modules'][$moduleIndex]['requirements'][] = $newRequirement;
-            saveData($data, $jsonFile);
-        }
-        header("Location: index.php?mode=edit");
-        exit;
-    }
-
-    // Reassign module to different term
-    if (isset($_POST['reassign_module'])) {
-        $moduleIndex = (int)($_POST['moduleIndexTerm'] ?? -1);
-        $newTerm     = (int)($_POST['newTerm'] ?? 1);
-        if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
-            $data['modules'][$moduleIndex]['term'] = $newTerm;
-            sortModules($data['modules']);
             saveData($data, $jsonFile);
         }
         header("Location: index.php?mode=edit");

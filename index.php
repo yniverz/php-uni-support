@@ -292,6 +292,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                 // add new requirement in edit mode
                 if ($isEditMode) {
                     ?>
+                    <p style="margin-bottom: 0.5em">Add Requirement:</p>
                     <form method="post" class="form-inline">
                         <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
                         <label>Description:

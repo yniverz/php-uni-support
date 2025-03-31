@@ -158,7 +158,7 @@ function getTimeUntilDisplay($dateStr) {
                     <th style="text-align:left; padding:8px;">Time<br>Until</th>
                     <th style="text-align:left; padding:8px;">Date</th>
                     <th style="text-align:left; padding:8px;">Requirement</th>
-                    <th style="text-align:left; padding:8px;">Module</th>
+                    <th style="text-align:left; padding:8px;">Term: Module</th>
                     <th style="text-align:left; padding:8px;">Credits</th>
                     <th style="text-align:left; padding:8px;">Done?</th>
                 </tr>
@@ -184,6 +184,7 @@ function getTimeUntilDisplay($dateStr) {
                         $desc   = htmlspecialchars($req['description']);
                         $mod    = htmlspecialchars($req['moduleName']);
                         $credits= (int)$req['credits'];
+                        $term   = (int)$req['term'];
                         $done   = $req['done'] ? 'Yes' : 'No';
                     ?>
                     <tr style="border-bottom:1px solid #eee; <?php echo $rowStyle; ?>">
@@ -194,7 +195,7 @@ function getTimeUntilDisplay($dateStr) {
 
                         <td style="padding:8px;"><?php echo $dateDisplay; ?></td>
                         <td style="padding:8px;"><?php echo $desc; ?></td>
-                        <td style="padding:8px;"><?php echo $mod; ?></td>
+                        <td style="padding:8px;"><?php echo $term; ?>: <?php echo $mod; ?></td>
                         <td style="padding:8px;"><?php echo $credits; ?></td>
                         <td style="padding:8px;"><?php echo $done; ?></td>
                     </tr>

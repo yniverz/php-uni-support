@@ -4,8 +4,11 @@
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
 # App Specific files
-public/app/users.json
-public/app/users/
+app/users.json
+app/users/
+
+# Apple files
+.DS_Store
 
 # User-specific files
 *.rsuser

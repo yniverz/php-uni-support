@@ -55,22 +55,25 @@ label {
 
 input[type="text"],
 input[type="password"],
+input[type="date"],
 input[type="number"] {
-    width: 100%;
     padding: 8px;
-    margin-bottom: 1em;
     border: 1px solid #ccc;
     border-radius: 3px;
+}
+
+input[type="date"] {
+    padding: 6px;
 }
 
 button {
     background: #007BFF;
     color: #fff;
     border: none;
-    padding: 10px 15px;
+    padding: 7px 10px;
     cursor: pointer;
     border-radius: 3px;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 button:hover {

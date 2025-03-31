@@ -29,6 +29,39 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
     <meta charset="utf-8" />
     <title>University Module Support System</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script>
+        (function() {
+            const STORAGE_KEY = 'scrollPositionData';
+            let scrollTimeout;
+
+            // Save scroll position with debounce (after scrolling ends)
+            window.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    const scrollData = {
+                        url: window.location.href,
+                        scrollY: window.scrollY
+                    };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(scrollData));
+                }, 200); // 200ms after scroll stops
+            });
+
+            // On page load, restore scroll position if URL matches
+            window.addEventListener('load', () => {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    try {
+                        const { url, scrollY } = JSON.parse(saved);
+                        if (url === window.location.href) {
+                            window.scrollTo({ top: scrollY, behavior: 'smooth' });
+                        }
+                    } catch (e) {
+                        console.error('Failed to parse scroll position data:', e);
+                    }
+                }
+            });
+        })();
+    </script>
 </head>
 <body>
 
@@ -98,18 +131,32 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
         <!-- EDIT MODE: Add module form -->
         <h2>Add a New Module</h2>
         <form method="post">
-            <label>Module Name:
-                <input type="text" name="moduleName" required />
-            </label>
-            <br />
-            <label>Ideal Term:
-                <input type="number" name="idealTerm" value="1" required />
-            </label>
-            <br />
-            <label>Assign to Term:
-                <input type="number" name="assignedTerm" value="1" required />
-            </label>
-            <br />
+            <table style='border-collapse: collapse;'>
+                <tr>
+                    <td style='padding: 4px 10px;'>
+                        <label for="add_module_name">Module Name:</label>
+                    </td>
+                    <td style='padding: 4px 10px;'>
+                        <input id="add_module_name" type="text" name="moduleName" required />
+                    </td>
+                </tr>
+                <tr>
+                    <td style='padding: 4px 10px;'>
+                        <label for="add_module_ideal_term">Ideal Term:</label>
+                    </td>
+                    <td style='padding: 4px 10px;'>
+                        <input id="add_module_ideal_term" type="number" name="idealTerm" value="1" required />
+                    </td>
+                </tr>
+                <tr>
+                    <td style='padding: 4px 10px;'>
+                        <label for="add_module_assigned_term">Assign to Term:</label>
+                    </td>
+                    <td style='padding: 4px 10px;'>
+                        <input id="add_module_assigned_term" type="number" name="assignedTerm" value="1" required />
+                    </td>
+                </tr>
+            </table>
             <button type="submit" name="add_module">Add Module</button>
         </form>
         <hr />
@@ -160,7 +207,8 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                 if ($isEditMode) {
                     echo "<br /><br />";
                     ?>
-                    <form method="post" class="form-inline">
+                    <!-- Reassign or Delete Module Forms -->
+                    <form method="post" class="form-inline" style="margin-bottom:5px;">
                         <input type="hidden" name="moduleIndexTerm" value="<?php echo $mIndex; ?>">
                         <label>Reassign to Term:
                             <input type="number" name="newTerm" value="<?php echo (int)$mod['term']; ?>" style="width:60px;">
@@ -187,20 +235,31 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                     $credits = $req['credits'];
                     $date    = !empty($req['date']) ? htmlspecialchars($req['date']) : '';
                     $done    = !empty($req['done']);
-                    ?>
-                    <li>
-                        <form method="post" style="display:inline;">
-                            <input type="hidden" name="toggle_req" value="1">
-                            <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
-                            <input type="hidden" name="reqIndex" value="<?php echo $reqIndex; ?>">
-                            <input type="checkbox" name="req_done" value="1"
-                                   <?php if($done) echo 'checked'; ?>
-                                   onchange="this.form.submit();">
-                            <?php echo "$desc — Credits: $credits" . ($date ? " ($date)" : ""); ?>
-                        </form>
-                        <?php
-                        if ($isEditMode) {
-                            ?>
+
+                    if ($isEditMode) {
+                        // In edit mode, show as input fields + update button
+                        ?>
+                        <li>
+                            <form method="post" style="display:inline;">
+                                <input type="hidden" name="update_requirement" value="1">
+                                <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
+                                <input type="hidden" name="reqIndex" value="<?php echo $reqIndex; ?>">
+
+                                <!-- Done Checkbox -->
+                                <input type="checkbox" name="req_done" value="1" <?php if($done) echo 'checked'; ?> />
+                                
+                                <!-- Editable fields -->
+                                <input type="text" name="requirement_desc" value="<?php echo $desc; ?>" required />
+                                <input type="number" name="requirement_credits" value="<?php echo $credits; ?>" style="width:60px;" required />
+                                <input type="date" name="requirement_date" value="<?php echo $date; ?>" />
+
+                                <!-- Update button -->
+                                <button type="submit">
+                                    Update
+                                </button>
+                            </form>
+
+                            <!-- Delete button (separate form) -->
                             <form method="post" style="display:inline; margin-left:10px;">
                                 <input type="hidden" name="delete_requirement" value="1">
                                 <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
@@ -209,11 +268,24 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                                     x
                                 </button>
                             </form>
-                            <?php
-                        }
+                        </li>
+                        <?php
+                    } else {
+                        // View mode only
                         ?>
-                    </li>
-                    <?php
+                        <li>
+                            <form method="post" style="display:inline;">
+                                <input type="hidden" name="toggle_req" value="1">
+                                <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
+                                <input type="hidden" name="reqIndex" value="<?php echo $reqIndex; ?>">
+                                <input type="checkbox" name="req_done" value="1"
+                                    <?php if($done) echo 'checked'; ?>
+                                    onchange="this.form.submit();">
+                                <?php echo "$desc — Credits: $credits" . ($date ? " ($date)" : ""); ?>
+                            </form>
+                        </li>
+                        <?php
+                    }
                 }
                 echo "</ul>";
 
@@ -240,7 +312,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
             }
 
             $actualCreditsSoFar = getCompletedCreditsUpToTerm($data['modules'], $termNumber);
-            $wantCreditsSoFar = getAllCreditsUpToTerm($data['modules'], $termNumber);
+            $wantCreditsSoFar   = getAllCreditsUpToTerm($data['modules'], $termNumber);
 
             echo "<div class='credit-summary'>";
             echo "<p><strong>Credits after Term $termNumber:</strong></p>";

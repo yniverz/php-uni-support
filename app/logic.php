@@ -111,15 +111,31 @@ if ($isEditMode) {
         exit;
     }
 
-    // Delete requirement
-    if (isset($_POST['delete_requirement'])) {
+    // Update requirement (description, credits, date, done/not-done)
+    if (isset($_POST['update_requirement'])) {
         $moduleIndex = (int)($_POST['moduleIndex'] ?? -1);
         $reqIndex    = (int)($_POST['reqIndex'] ?? -1);
+        if (
+            $moduleIndex >= 0 && isset($data['modules'][$moduleIndex]) &&
+            $reqIndex >= 0 && isset($data['modules'][$moduleIndex]['requirements'][$reqIndex])
+        ) {
+            // Grab updated info
+            $reqDone        = !empty($_POST['req_done']);
+            $reqDesc        = trim($_POST['requirement_desc'] ?? '');
+            $reqCredits     = (int)($_POST['requirement_credits'] ?? 0);
+            $reqDate        = trim($_POST['requirement_date'] ?? '');
 
-        if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex]) &&
-            $reqIndex >= 0 && isset($data['modules'][$moduleIndex]['requirements'][$reqIndex])) {
+            // Apply to the existing requirement
+            $data['modules'][$moduleIndex]['requirements'][$reqIndex]['done']        = $reqDone;
+            $data['modules'][$moduleIndex]['requirements'][$reqIndex]['description'] = $reqDesc;
+            $data['modules'][$moduleIndex]['requirements'][$reqIndex]['credits']     = $reqCredits;
+            if ($reqDate !== '') {
+                $data['modules'][$moduleIndex]['requirements'][$reqIndex]['date'] = $reqDate;
+            } else {
+                // If date field is cleared, remove the date key
+                unset($data['modules'][$moduleIndex]['requirements'][$reqIndex]['date']);
+            }
 
-            array_splice($data['modules'][$moduleIndex]['requirements'], $reqIndex, 1);
             updateModuleCompletionStatus($data['modules'][$moduleIndex]);
             saveData($data, $jsonFile);
         }
@@ -127,11 +143,17 @@ if ($isEditMode) {
         exit;
     }
 
-    // Delete module
-    if (isset($_POST['delete_module'])) {
+    // Delete requirement
+    if (isset($_POST['delete_requirement'])) {
         $moduleIndex = (int)($_POST['moduleIndex'] ?? -1);
-        if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
-            array_splice($data['modules'], $moduleIndex, 1);
+        $reqIndex    = (int)($_POST['reqIndex'] ?? -1);
+
+        if (
+            $moduleIndex >= 0 && isset($data['modules'][$moduleIndex]) &&
+            $reqIndex >= 0 && isset($data['modules'][$moduleIndex]['requirements'][$reqIndex])
+        ) {
+            array_splice($data['modules'][$moduleIndex]['requirements'], $reqIndex, 1);
+            updateModuleCompletionStatus($data['modules'][$moduleIndex]);
             saveData($data, $jsonFile);
         }
         header("Location: index.php?mode=edit");
@@ -162,5 +184,5 @@ if (isset($_POST['toggle_req'])) {
     exit;
 }
 
-// Finally, define $totalSoFar for the view
+// Finally, define $totalSoFar for the view (always needed)
 $totalSoFar = getTotalCreditsSoFar($data['modules']);

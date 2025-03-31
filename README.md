@@ -9,6 +9,11 @@ All data (user accounts and module information) is stored in JSON files statical
 
 ---
 
+![image](https://github.com/user-attachments/assets/0b884fb2-cb85-4f0e-bf4e-2fdfdfa31bf9)
+
+
+---
+
 ## Installation/Setup
 
 ### Prerequisites

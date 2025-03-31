@@ -9,6 +9,9 @@ RewriteEngine On
 # If the request starts with "app/", return a 404 (pretend it doesn't exist)
 RewriteRule ^app/ - [R=404,L]
 
+# If the request starts with ".git/", return a 404 (pretend it doesn't exist)
+RewriteRule ^\.git/ - [R=404,L]
+
 # Optionally ensure we load index.php by default if directory requested
 DirectoryIndex index.php
 

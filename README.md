@@ -51,7 +51,7 @@ All data (user accounts and module information) is stored in JSON files statical
 
 ## License
 
-[![License: NCPUL](https://img.shields.io/badge/license-NCPUL-blue.svg)](./LICENSE)
+[![License: NCPUL](https://img.shields.io/badge/license-NCPUL-blue.svg)](./LICENSE.md)
 
 This project is licensed under the **Non-Commercial Public Use License (NCPUL)**.  
 You can use, modify, and share it freely **as long as you don't charge for it** or use it in any way that generates revenue.  

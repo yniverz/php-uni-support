@@ -48,3 +48,13 @@ All data (user accounts and module information) is stored in JSON files statical
 ### iCal Integration
 - You can add the requirements with dates as events to your calendar using the iCal path `/calendar.ics?username=USERNAME&password=PASSWORD`.
 - Just put this link (with your domain and username/password) into your calendar app and it will automatically add the events to your calendar.
+
+## License
+
+[![License: NCPUL](https://img.shields.io/badge/license-NCPUL-blue.svg)](./LICENSE)
+
+This project is licensed under the **Non-Commercial Public Use License (NCPUL)**.  
+You can use, modify, and share it freely **as long as you don't charge for it** or use it in any way that generates revenue.  
+Commercial use, monetization, and paid access are **strictly prohibited**.
+
+See [LICENSE](./LICENSE.md) for full terms.

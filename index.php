@@ -80,6 +80,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
             <?php endif; ?>
 
             <a href="requirements.php">View All Requirements by Date</a>
+            <a href="stats.php">Stats</a>
         </div>
     </header>
 

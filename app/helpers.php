@@ -12,6 +12,22 @@ function isLoggedIn() {
     return (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true);
 }
 
+function getAverageGrade($modules) {
+    $totalCredits = 0;
+    $totalGradePoints = 0;
+
+    foreach ($modules as $module) {
+        foreach ($module['requirements'] as $req) {
+            if (!empty($req['grade'])) {
+                $totalCredits += $req['credits'];
+                $totalGradePoints += $req['grade'] * $req['credits'];
+            }
+        }
+    }
+
+    return ($totalCredits > 0) ? round($totalGradePoints / $totalCredits, 2) : 0;
+}
+
 function getTotalCreditsSoFar($modules) {
     $total = 0;
     foreach ($modules as $module) {

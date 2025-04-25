@@ -125,6 +125,10 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
         <strong>Total Credits So Far:</strong>
         <?php echo $totalSoFar; ?> / <?php echo $data['totalNeededCredits']; ?>
     </p>
+    <p class="info-line">
+        <strong>Average Grade:</strong>
+        <?php echo htmlspecialchars(getAverageGrade($data['modules'])); ?>
+    </p>
     <br />
 
     <?php if ($isEditMode): ?>
@@ -234,6 +238,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                     $desc    = htmlspecialchars($req['description']);
                     $credits = $req['credits'];
                     $date    = !empty($req['date']) ? htmlspecialchars($req['date']) : '';
+                    $grade   = !empty($req['grade']) ? htmlspecialchars($req['grade']) : '';
                     $done    = !empty($req['done']);
 
                     if ($isEditMode) {
@@ -249,8 +254,11 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                                 <input type="checkbox" name="req_done" value="1" <?php if($done) echo 'checked'; ?> />
                                 
                                 <!-- Editable fields -->
-                                <input type="text" name="requirement_desc" value="<?php echo $desc; ?>" required />
-                                <input type="number" name="requirement_credits" value="<?php echo $credits; ?>" style="width:60px;" required />
+                                <input type="text" name="requirement_desc" value="<?php echo $desc; ?>" required title="Description" />
+                                <input type="number" name="requirement_credits" value="<?php echo $credits; ?>" style="width:60px;" required title="Credits" />
+                                <?php if ($credits > 0 && $done): ?>
+                                    <input type="number" name="requirement_grade" step="0.1" value="<?php echo $grade; ?>" style="width:60px;" title="Grade (optional)" />
+                                <?php endif; ?>
                                 <input type="date" name="requirement_date" value="<?php echo $date; ?>" />
 
                                 <!-- Update button -->
@@ -281,7 +289,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                                 <input type="checkbox" name="req_done" value="1"
                                     <?php if($done) echo 'checked'; ?>
                                     onchange="this.form.submit();">
-                                <?php echo "$desc — Credits: $credits" . ($date ? " ($date)" : ""); ?>
+                                <?php echo ($grade ? "$grade — " : "") . "$desc — Credits: $credits" . ($date ? " — ($date)" : ""); ?>
                             </form>
                         </li>
                         <?php

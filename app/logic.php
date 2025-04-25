@@ -134,12 +134,19 @@ if ($isEditMode) {
             $reqDone        = !empty($_POST['req_done']);
             $reqDesc        = trim($_POST['requirement_desc'] ?? '');
             $reqCredits     = (int)($_POST['requirement_credits'] ?? 0);
+            $reqGrade       = (float)($_POST['requirement_grade'] ?? 0);
             $reqDate        = trim($_POST['requirement_date'] ?? '');
 
             // Apply to the existing requirement
             $data['modules'][$moduleIndex]['requirements'][$reqIndex]['done']        = $reqDone;
             $data['modules'][$moduleIndex]['requirements'][$reqIndex]['description'] = $reqDesc;
             $data['modules'][$moduleIndex]['requirements'][$reqIndex]['credits']     = $reqCredits;
+            if ($reqGrade > 0) {
+                $data['modules'][$moduleIndex]['requirements'][$reqIndex]['grade'] = $reqGrade;
+            } else {
+                // If grade field is cleared, remove the grade key
+                unset($data['modules'][$moduleIndex]['requirements'][$reqIndex]['grade']);
+            }
             if ($reqDate !== '') {
                 $data['modules'][$moduleIndex]['requirements'][$reqIndex]['date'] = $reqDate;
             } else {

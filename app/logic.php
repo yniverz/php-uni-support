@@ -103,7 +103,7 @@ if ($isEditMode) {
     if (isset($_POST['add_requirement'])) {
         $moduleIndex = (int)($_POST['moduleIndex'] ?? -1);
         $description = trim($_POST['requirement_desc'] ?? '');
-        $credits     = (int)($_POST['requirement_credits'] ?? 0);
+        $credits     = (float)($_POST['requirement_credits'] ?? 0);
         $date        = trim($_POST['requirement_date'] ?? '');
 
         if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex]) && $description !== '') {
@@ -133,7 +133,7 @@ if ($isEditMode) {
             // Grab updated info
             $reqDone        = !empty($_POST['req_done']);
             $reqDesc        = trim($_POST['requirement_desc'] ?? '');
-            $reqCredits     = (int)($_POST['requirement_credits'] ?? 0);
+            $reqCredits     = (float)($_POST['requirement_credits'] ?? 0);
             $reqGrade       = (float)($_POST['requirement_grade'] ?? 0);
             $reqDate        = trim($_POST['requirement_date'] ?? '');
 

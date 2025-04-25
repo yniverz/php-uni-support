@@ -100,7 +100,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
 
         <form method="post">
             <label>
-                Semester Targets (comma-separated, e.g. "6,9"):
+                Target Terms (comma-separated, e.g. "6,9"):
                 <input type="text" name="semesterTargets"
                        value="<?php echo htmlspecialchars(implode(', ', $data['semesterTargets'])); ?>"
                        required />
@@ -116,7 +116,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
             <?php echo htmlspecialchars($data['totalNeededCredits']); ?>
         </p>
         <p class="info-line">
-            <strong>Semester Targets:</strong>
+            <strong>Target Terms:</strong>
             <?php echo htmlspecialchars(implode(', ', $data['semesterTargets'])); ?>
         </p>
         <hr />
@@ -256,7 +256,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                                 
                                 <!-- Editable fields -->
                                 <input type="text" name="requirement_desc" value="<?php echo $desc; ?>" required title="Description" />
-                                <input type="number" name="requirement_credits" value="<?php echo $credits; ?>" style="width:60px;" required title="Credits" />
+                                <input type="number" name="requirement_credits" step="0.5" value="<?php echo $credits; ?>" style="width:60px;" required title="Credits" />
                                 <?php if ($credits > 0 && $done): ?>
                                     <input type="number" name="requirement_grade" step="0.1" value="<?php echo $grade; ?>" style="width:60px;" title="Grade (optional)" />
                                 <?php endif; ?>
@@ -308,7 +308,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                             <input type="text" name="requirement_desc" required>
                         </label>
                         <label>Credits:
-                            <input type="number" name="requirement_credits" value="0" required style="width:60px;">
+                            <input type="number" name="requirement_credits" step="0.5" value="0" required style="width:60px;">
                         </label>
                         <label>Date (optional):
                             <input type="date" name="requirement_date">

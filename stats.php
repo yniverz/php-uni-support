@@ -82,7 +82,7 @@ foreach ($modules as $mod) {
             'desc' => $req['description'],
             'credits' => $credits,
             'grade' => $grade,
-            'date' => $req['date'] ? strtotime($req['date']) : null,
+            'date' => isset($req['date']) ? strtotime($req['date']) : null,
             'seq' => $seq++,
         ];
     }

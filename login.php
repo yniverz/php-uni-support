@@ -37,28 +37,31 @@ if (isset($_POST['login_submit'])) {
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <title>University Module Support System - Login</title>
     <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
-<div class="login-container">
-    <h1>Login</h1>
-    <?php if ($loginError): ?>
-        <p class="error"><?php echo htmlspecialchars($loginError); ?></p>
-    <?php endif; ?>
-    <form method="post" action="">
-        <label>Username:
-            <input type="text" name="username" required>
-        </label>
-        <label>Password:
-            <input type="password" name="password" required>
-        </label>
-        <button type="submit" name="login_submit">Login</button>
-    </form>
-    <!-- Registration link -->
-    <p>Don't have an account? <a href="register.php">Register here</a></p>
-</div>
+    <div class="login-container">
+        <h1>Login</h1>
+        <?php if ($loginError): ?>
+            <p class="error"><?php echo htmlspecialchars($loginError); ?></p>
+        <?php endif; ?>
+        <form method="post" action="">
+            <label>Username:
+                <input type="text" name="username" required>
+            </label>
+            <label>Password:
+                <input type="password" name="password" required>
+            </label>
+            <button type="submit" name="login_submit">Login</button>
+        </form>
+        <!-- Registration link -->
+        <p>Don't have an account? <a href="register.php">Register here</a></p>
+    </div>
 </body>
+
 </html>

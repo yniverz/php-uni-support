@@ -81,17 +81,19 @@ if (isset($_POST['action'])) {
 /**
  * 5) Helper function to generate random password
  */
-function generateRandomPassword($length=8) {
+function generateRandomPassword($length = 8)
+{
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     $pwd = '';
-    for ($i=0; $i<$length; $i++) {
-        $pwd .= $chars[random_int(0, strlen($chars)-1)];
+    for ($i = 0; $i < $length; $i++) {
+        $pwd .= $chars[random_int(0, strlen($chars) - 1)];
     }
     return $pwd;
 }
 
 // We'll define a function to save $userData
-function saveUserData($file, $dataArr) {
+function saveUserData($file, $dataArr)
+{
     file_put_contents($file, json_encode($dataArr, JSON_PRETTY_PRINT));
 }
 
@@ -99,61 +101,66 @@ function saveUserData($file, $dataArr) {
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <title>Admin - Manage Users</title>
     <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
-<div class="container">
-    <h1>Admin User Management</h1>
-    <p><a href="index.php">Back to Modules</a></p>
+    <div class="container">
+        <h1>Admin User Management</h1>
+        <p><a href="index.php">Back to Modules</a></p>
 
-    <?php if ($feedbackMsg): ?>
-        <div style="padding:10px; margin:10px 0; background:#eef;">
-            <?php echo $feedbackMsg; ?>
-        </div>
-    <?php endif; ?>
+        <?php if ($feedbackMsg): ?>
+            <div style="padding:10px; margin:10px 0; background:#eef;">
+                <?php echo $feedbackMsg; ?>
+            </div>
+        <?php endif; ?>
 
-    <h2>Existing Users</h2>
-    <?php if (empty($userData)): ?>
-        <p>No users found.</p>
-    <?php else: ?>
-        <table border="1" cellpadding="5" cellspacing="0">
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>User ID</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($userData as $uname => $info): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($uname); ?></td>
-                    <td><?php echo htmlspecialchars($info['userid'] ?? ''); ?></td>
-                    <td>
-                        <!-- Delete Form -->
-                        <?php if ($uname !== $_SESSION['username']): // Don't show delete for admin ?>
-                            <form method="post" style="display:inline;" onsubmit="return confirm('Delete this user?');">
-                                <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="username" value="<?php echo htmlspecialchars($uname); ?>">
-                                <input type="hidden" name="userid" value="<?php echo htmlspecialchars($info['userid'] ?? ''); ?>">
-                                <button type="submit">Delete</button>
-                        </form>
-                        <?php endif; ?>
-                        <!-- Reset Password Form -->
-                        <form method="post" style="display:inline;" onsubmit="return confirm('Reset password for this user?');">
-                            <input type="hidden" name="action" value="reset">
-                            <input type="hidden" name="username" value="<?php echo htmlspecialchars($uname); ?>">
-                            <button type="submit">Reset Password</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
-</div>
+        <h2>Existing Users</h2>
+        <?php if (empty($userData)): ?>
+            <p>No users found.</p>
+        <?php else: ?>
+            <table border="1" cellpadding="5" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>User ID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($userData as $uname => $info): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($uname); ?></td>
+                            <td><?php echo htmlspecialchars($info['userid'] ?? ''); ?></td>
+                            <td>
+                                <!-- Delete Form -->
+                                <?php if ($uname !== $_SESSION['username']): // Don't show delete for admin ?>
+                                    <form method="post" style="display:inline;" onsubmit="return confirm('Delete this user?');">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="username" value="<?php echo htmlspecialchars($uname); ?>">
+                                        <input type="hidden" name="userid"
+                                            value="<?php echo htmlspecialchars($info['userid'] ?? ''); ?>">
+                                        <button type="submit">Delete</button>
+                                    </form>
+                                <?php endif; ?>
+                                <!-- Reset Password Form -->
+                                <form method="post" style="display:inline;"
+                                    onsubmit="return confirm('Reset password for this user?');">
+                                    <input type="hidden" name="action" value="reset">
+                                    <input type="hidden" name="username" value="<?php echo htmlspecialchars($uname); ?>">
+                                    <button type="submit">Reset Password</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </div>
 </body>
+
 </html>

@@ -40,8 +40,7 @@ if (isset($_POST['register_submit'])) {
     // 4) Check if username already exists in $userData
     elseif (isset($userData[$username])) {
         $registerError = "Username already taken. Please choose another.";
-    }
-    else {
+    } else {
         // 5) If all checks pass, hash the password and store it
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
@@ -74,37 +73,40 @@ if (isset($_POST['register_submit'])) {
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <title>University Module Support System - Register</title>
     <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
-<div class="login-container">
-    <h1>Register</h1>
-    <?php if ($registerError): ?>
-        <p class="error"><?php echo htmlspecialchars($registerError); ?></p>
-    <?php endif; ?>
 
-    <?php if ($registerSuccess): ?>
-        <p class="success"><?php echo htmlspecialchars($registerSuccess); ?></p>
-        <p><a href="login.php">Back to Login</a></p>
-    <?php else: ?>
-        <!-- Show the Registration Form -->
-        <form method="post" action="">
-            <label>Username:
-                <input type="text" name="username" required>
-            </label>
-            <label>Password:
-                <input type="password" name="password" required>
-            </label>
-            <label>Confirm Password:
-                <input type="password" name="password2" required>
-            </label>
-            <button type="submit" name="register_submit">Register</button>
-        </form>
-        <p>Already have an account? <a href="login.php">Login here</a></p>
-    <?php endif; ?>
-</div>
+<body>
+    <div class="login-container">
+        <h1>Register</h1>
+        <?php if ($registerError): ?>
+            <p class="error"><?php echo htmlspecialchars($registerError); ?></p>
+        <?php endif; ?>
+
+        <?php if ($registerSuccess): ?>
+            <p class="success"><?php echo htmlspecialchars($registerSuccess); ?></p>
+            <p><a href="login.php">Back to Login</a></p>
+        <?php else: ?>
+            <!-- Show the Registration Form -->
+            <form method="post" action="">
+                <label>Username:
+                    <input type="text" name="username" required>
+                </label>
+                <label>Password:
+                    <input type="password" name="password" required>
+                </label>
+                <label>Confirm Password:
+                    <input type="password" name="password2" required>
+                </label>
+                <button type="submit" name="register_submit">Register</button>
+            </form>
+            <p>Already have an account? <a href="login.php">Login here</a></p>
+        <?php endif; ?>
+    </div>
 </body>
+
 </html>

@@ -20,7 +20,7 @@ if ($isEditMode) {
 
     // Update total needed credits
     if (isset($_POST['update_credits'])) {
-        $data['totalNeededCredits'] = (int)($_POST['totalNeededCredits'] ?? 120);
+        $data['totalNeededCredits'] = (int) ($_POST['totalNeededCredits'] ?? 120);
         saveData($data, $jsonFile);
         header("Location: index.php?mode=edit");
         exit;
@@ -30,9 +30,9 @@ if ($isEditMode) {
     if (isset($_POST['update_semester_targets'])) {
         $targetsStr = $_POST['semesterTargets'] ?? '';
         $targetsArr = array_map('trim', explode(',', $targetsStr));
-        $filtered   = [];
+        $filtered = [];
         foreach ($targetsArr as $val) {
-            $valInt = (int)$val;
+            $valInt = (int) $val;
             if ($valInt > 0) {
                 $filtered[] = $valInt;
             }
@@ -45,9 +45,9 @@ if ($isEditMode) {
 
     // Add a new module
     if (isset($_POST['add_module'])) {
-        $moduleName   = trim($_POST['moduleName'] ?? '');
-        $idealTerm    = (int)($_POST['idealTerm'] ?? 1);
-        $assignedTerm = (int)($_POST['assignedTerm'] ?? 1);
+        $moduleName = trim($_POST['moduleName'] ?? '');
+        $idealTerm = (int) ($_POST['idealTerm'] ?? 1);
+        $assignedTerm = (int) ($_POST['assignedTerm'] ?? 1);
 
         if ($moduleName !== '') {
             // Check uniqueness
@@ -60,11 +60,11 @@ if ($isEditMode) {
             }
             if ($unique) {
                 $newModule = [
-                    'name'        => $moduleName,
-                    'idealTerm'   => $idealTerm,
-                    'term'        => $assignedTerm,
-                    'requirements'=> [],
-                    'allDone'     => false
+                    'name' => $moduleName,
+                    'idealTerm' => $idealTerm,
+                    'term' => $assignedTerm,
+                    'requirements' => [],
+                    'allDone' => false
                 ];
                 $data['modules'][] = $newModule;
                 sortModules($data['modules']);
@@ -77,8 +77,8 @@ if ($isEditMode) {
 
     // Reassign module to different term
     if (isset($_POST['reassign_module'])) {
-        $moduleIndex = (int)($_POST['moduleIndexTerm'] ?? -1);
-        $newTerm     = (int)($_POST['newTerm'] ?? 1);
+        $moduleIndex = (int) ($_POST['moduleIndexTerm'] ?? -1);
+        $newTerm = (int) ($_POST['newTerm'] ?? 1);
         if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
             $data['modules'][$moduleIndex]['term'] = $newTerm;
             sortModules($data['modules']);
@@ -90,7 +90,7 @@ if ($isEditMode) {
 
     // Delete module
     if (isset($_POST['delete_module'])) {
-        $moduleIndex = (int)($_POST['moduleIndex'] ?? -1);
+        $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
         if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
             array_splice($data['modules'], $moduleIndex, 1);
             saveData($data, $jsonFile);
@@ -101,16 +101,16 @@ if ($isEditMode) {
 
     // Add a new sub-requirement
     if (isset($_POST['add_requirement'])) {
-        $moduleIndex = (int)($_POST['moduleIndex'] ?? -1);
+        $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
         $description = trim($_POST['requirement_desc'] ?? '');
-        $credits     = (float)($_POST['requirement_credits'] ?? 0);
-        $date        = trim($_POST['requirement_date'] ?? '');
+        $credits = (float) ($_POST['requirement_credits'] ?? 0);
+        $date = trim($_POST['requirement_date'] ?? '');
 
         if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex]) && $description !== '') {
             $newRequirement = [
                 'description' => $description,
-                'credits'     => $credits,
-                'done'        => false
+                'credits' => $credits,
+                'done' => false
             ];
             if ($date !== '') {
                 $newRequirement['date'] = $date;
@@ -124,23 +124,23 @@ if ($isEditMode) {
 
     // Update requirement (description, credits, date, done/not-done)
     if (isset($_POST['update_requirement'])) {
-        $moduleIndex = (int)($_POST['moduleIndex'] ?? -1);
-        $reqIndex    = (int)($_POST['reqIndex'] ?? -1);
+        $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
+        $reqIndex = (int) ($_POST['reqIndex'] ?? -1);
         if (
             $moduleIndex >= 0 && isset($data['modules'][$moduleIndex]) &&
             $reqIndex >= 0 && isset($data['modules'][$moduleIndex]['requirements'][$reqIndex])
         ) {
             // Grab updated info
-            $reqDone        = !empty($_POST['req_done']);
-            $reqDesc        = trim($_POST['requirement_desc'] ?? '');
-            $reqCredits     = (float)($_POST['requirement_credits'] ?? 0);
-            $reqGrade       = (float)($_POST['requirement_grade'] ?? 0);
-            $reqDate        = trim($_POST['requirement_date'] ?? '');
+            $reqDone = !empty($_POST['req_done']);
+            $reqDesc = trim($_POST['requirement_desc'] ?? '');
+            $reqCredits = (float) ($_POST['requirement_credits'] ?? 0);
+            $reqGrade = (float) ($_POST['requirement_grade'] ?? 0);
+            $reqDate = trim($_POST['requirement_date'] ?? '');
 
             // Apply to the existing requirement
-            $data['modules'][$moduleIndex]['requirements'][$reqIndex]['done']        = $reqDone;
+            $data['modules'][$moduleIndex]['requirements'][$reqIndex]['done'] = $reqDone;
             $data['modules'][$moduleIndex]['requirements'][$reqIndex]['description'] = $reqDesc;
-            $data['modules'][$moduleIndex]['requirements'][$reqIndex]['credits']     = $reqCredits;
+            $data['modules'][$moduleIndex]['requirements'][$reqIndex]['credits'] = $reqCredits;
             if ($reqGrade > 0) {
                 $data['modules'][$moduleIndex]['requirements'][$reqIndex]['grade'] = $reqGrade;
             } else {
@@ -163,8 +163,8 @@ if ($isEditMode) {
 
     // Delete requirement
     if (isset($_POST['delete_requirement'])) {
-        $moduleIndex = (int)($_POST['moduleIndex'] ?? -1);
-        $reqIndex    = (int)($_POST['reqIndex'] ?? -1);
+        $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
+        $reqIndex = (int) ($_POST['reqIndex'] ?? -1);
 
         if (
             $moduleIndex >= 0 && isset($data['modules'][$moduleIndex]) &&
@@ -181,15 +181,17 @@ if ($isEditMode) {
 
 // Requirement toggle (always allowed, even in view mode)
 if (isset($_POST['toggle_req'])) {
-    $moduleIndex = (int)($_POST['moduleIndex'] ?? -1);
-    $reqIndex    = (int)($_POST['reqIndex'] ?? -1);
+    $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
+    $reqIndex = (int) ($_POST['reqIndex'] ?? -1);
 
-    if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex]) &&
-        $reqIndex >= 0 && isset($data['modules'][$moduleIndex]['requirements'][$reqIndex])) {
+    if (
+        $moduleIndex >= 0 && isset($data['modules'][$moduleIndex]) &&
+        $reqIndex >= 0 && isset($data['modules'][$moduleIndex]['requirements'][$reqIndex])
+    ) {
 
         $isDone = !empty($_POST['req_done']);
         $data['modules'][$moduleIndex]['requirements'][$reqIndex]['done'] = $isDone;
-        
+
         updateModuleCompletionStatus($data['modules'][$moduleIndex]);
         saveData($data, $jsonFile);
     }

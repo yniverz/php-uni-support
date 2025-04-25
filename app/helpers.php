@@ -4,15 +4,18 @@
  * Helper functions for your module system.
  */
 
-function saveData($data, $jsonFile) {
+function saveData($data, $jsonFile)
+{
     file_put_contents($jsonFile, json_encode($data, JSON_PRETTY_PRINT));
 }
 
-function isLoggedIn() {
+function isLoggedIn()
+{
     return (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true);
 }
 
-function getAverageGrade($modules) {
+function getAverageGrade($modules)
+{
     $totalCredits = 0;
     $totalGradePoints = 0;
 
@@ -28,7 +31,8 @@ function getAverageGrade($modules) {
     return ($totalCredits > 0) ? round($totalGradePoints / $totalCredits, 2) : 0;
 }
 
-function getTotalCreditsSoFar($modules) {
+function getTotalCreditsSoFar($modules)
+{
     $total = 0;
     foreach ($modules as $module) {
         foreach ($module['requirements'] as $req) {
@@ -40,7 +44,8 @@ function getTotalCreditsSoFar($modules) {
     return $total;
 }
 
-function getCompletedCreditsUpToTerm($modules, $termNumber) {
+function getCompletedCreditsUpToTerm($modules, $termNumber)
+{
     $total = 0;
     foreach ($modules as $module) {
         if ($module['term'] <= $termNumber) {
@@ -54,7 +59,8 @@ function getCompletedCreditsUpToTerm($modules, $termNumber) {
     return $total;
 }
 
-function getAllCreditsUpToTerm($modules, $termNumber) {
+function getAllCreditsUpToTerm($modules, $termNumber)
+{
     $total = 0;
     foreach ($modules as $module) {
         if ($module['term'] <= $termNumber) {
@@ -66,7 +72,8 @@ function getAllCreditsUpToTerm($modules, $termNumber) {
     return $total;
 }
 
-function getTermCredits($modules, $termNumber) {
+function getTermCredits($modules, $termNumber)
+{
     $termTotal = 0;
     foreach ($modules as $module) {
         if ($module['term'] == $termNumber) {
@@ -78,7 +85,8 @@ function getTermCredits($modules, $termNumber) {
     return $termTotal;
 }
 
-function updateModuleCompletionStatus(&$module) {
+function updateModuleCompletionStatus(&$module)
+{
     $allDone = true;
     foreach ($module['requirements'] as $req) {
         if (empty($req['done'])) {
@@ -89,7 +97,8 @@ function updateModuleCompletionStatus(&$module) {
     $module['allDone'] = $allDone;
 }
 
-function sortModules(&$modules) {
+function sortModules(&$modules)
+{
     usort($modules, function ($a, $b) {
         if ($a['term'] == $b['term']) {
             return $a['idealTerm'] <=> $b['idealTerm'];

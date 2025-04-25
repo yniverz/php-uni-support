@@ -12,19 +12,19 @@ if (!$isLoggedIn) {
 }
 
 // 2) Build a flat array of ALL requirements from all modules
-$allRequirements = []; 
+$allRequirements = [];
 
 foreach ($data['modules'] as $module) {
     $moduleName = $module['name'];
-    $moduleTerm = isset($module['term']) ? (int)$module['term'] : 999; // fallback if missing
+    $moduleTerm = isset($module['term']) ? (int) $module['term'] : 999; // fallback if missing
     foreach ($module['requirements'] as $req) {
         $allRequirements[] = [
-            'moduleName'   => $moduleName,
-            'term'         => $moduleTerm,  // used if no date
-            'description'  => $req['description'],
-            'credits'      => $req['credits'],
-            'done'         => !empty($req['done']),
-            'date'         => isset($req['date']) ? trim($req['date']) : ''
+            'moduleName' => $moduleName,
+            'term' => $moduleTerm,  // used if no date
+            'description' => $req['description'],
+            'credits' => $req['credits'],
+            'done' => !empty($req['done']),
+            'date' => isset($req['date']) ? trim($req['date']) : ''
         ];
     }
 }
@@ -34,12 +34,12 @@ foreach ($data['modules'] as $module) {
 //    2) Not done + no date (then by term)
 //    3) Done + earliest date
 //    4) Done + no date (then by term)
-usort($allRequirements, function($a, $b) {
+usort($allRequirements, function ($a, $b) {
     // (a) Compare done status first
     $aDone = $a['done'] ? 1 : 0;
     $bDone = $b['done'] ? 1 : 0;
     if ($aDone !== $bDone) {
-        return $aDone <=> $bDone; 
+        return $aDone <=> $bDone;
         // not done (0) => first, done (1) => last
     }
 
@@ -68,7 +68,8 @@ $today = date('Y-m-d');
  *       0..2 => red
  *     If in the past => normal text color (inherit).
  */
-function getTimeUntilDisplay($dateStr) {
+function getTimeUntilDisplay($dateStr)
+{
     if (!$dateStr) {
         // no date => blank
         return ['', ''];
@@ -134,38 +135,40 @@ function getTimeUntilDisplay($dateStr) {
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>All Requirements by Date</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
-<div class="container">
-    <header>
-        <h1>All Requirements by Date</h1>
-        <div class="top-links">
-            <a href="index.php">Back to Modules</a>
-        </div>
-    </header>
+    <div class="container">
+        <header>
+            <h1>All Requirements by Date</h1>
+            <div class="top-links">
+                <a href="index.php">Back to Modules</a>
+            </div>
+        </header>
 
-    <?php if (empty($allRequirements)): ?>
-        <p>No requirements found.</p>
-    <?php else: ?>
-        <table style="width:100%; border-collapse:collapse;">
-            <thead>
-                <tr style="border-bottom:1px solid #ccc;">
-                    <th style="text-align:left; padding:8px;">Time<br>Until</th>
-                    <th style="text-align:left; padding:8px;">Date</th>
-                    <th style="text-align:left; padding:8px;">Requirement</th>
-                    <th style="text-align:left; padding:8px;">Term: Module</th>
-                    <th style="text-align:left; padding:8px;">Credits</th>
-                    <th style="text-align:left; padding:8px;">Done?</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($allRequirements as $req): ?>
-                    <?php
+        <?php if (empty($allRequirements)): ?>
+            <p>No requirements found.</p>
+        <?php else: ?>
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="border-bottom:1px solid #ccc;">
+                        <th style="text-align:left; padding:8px;">Time<br>Until</th>
+                        <th style="text-align:left; padding:8px;">Date</th>
+                        <th style="text-align:left; padding:8px;">Requirement</th>
+                        <th style="text-align:left; padding:8px;">Term: Module</th>
+                        <th style="text-align:left; padding:8px;">Credits</th>
+                        <th style="text-align:left; padding:8px;">Done?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($allRequirements as $req): ?>
+                        <?php
                         // Row styling for done or date < today => grey out
                         $rowStyle = '';
                         if ($req['done']) {
@@ -181,29 +184,30 @@ function getTimeUntilDisplay($dateStr) {
                         list($timeStr, $timeStyle) = getTimeUntilDisplay($req['date']);
 
                         $dateDisplay = $req['date'] ? $req['date'] : '—';
-                        $desc   = htmlspecialchars($req['description']);
-                        $mod    = htmlspecialchars($req['moduleName']);
-                        $credits= (int)$req['credits'];
-                        $term   = (int)$req['term'];
-                        $done   = $req['done'] ? 'Yes' : 'No';
-                    ?>
-                    <tr style="border-bottom:1px solid #eee; <?php echo $rowStyle; ?>">
-                        <!-- Time Until -->
-                        <td style="padding:8px; <?php echo $timeStyle; ?>">
-                            <?php echo $timeStr; ?>
-                        </td>
+                        $desc = htmlspecialchars($req['description']);
+                        $mod = htmlspecialchars($req['moduleName']);
+                        $credits = (int) $req['credits'];
+                        $term = (int) $req['term'];
+                        $done = $req['done'] ? 'Yes' : 'No';
+                        ?>
+                        <tr style="border-bottom:1px solid #eee; <?php echo $rowStyle; ?>">
+                            <!-- Time Until -->
+                            <td style="padding:8px; <?php echo $timeStyle; ?>">
+                                <?php echo $timeStr; ?>
+                            </td>
 
-                        <td style="padding:8px;"><?php echo $dateDisplay; ?></td>
-                        <td style="padding:8px;"><?php echo $desc; ?></td>
-                        <td style="padding:8px;"><?php echo $term; ?>: <?php echo $mod; ?></td>
-                        <td style="padding:8px;"><?php echo $credits; ?></td>
-                        <td style="padding:8px;"><?php echo $done; ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
-</div>
+                            <td style="padding:8px;"><?php echo $dateDisplay; ?></td>
+                            <td style="padding:8px;"><?php echo $desc; ?></td>
+                            <td style="padding:8px;"><?php echo $term; ?>: <?php echo $mod; ?></td>
+                            <td style="padding:8px;"><?php echo $credits; ?></td>
+                            <td style="padding:8px;"><?php echo $done; ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </div>
 
 </body>
+
 </html>

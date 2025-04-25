@@ -40,11 +40,13 @@ require __DIR__ . '/app/logic.php'; // This loads $data
 header('Content-Type: text/calendar; charset=utf-8');
 header('Content-Disposition: inline; filename="requirements.ics"');
 
-function generateUID($moduleName, $requirement, $credits, $date) {
+function generateUID($moduleName, $requirement, $credits, $date)
+{
     return md5($moduleName . $requirement . $credits . $date) . "@ums.local";
 }
 
-function formatDateICS($date) {
+function formatDateICS($date)
+{
     return str_replace('-', '', $date);
 }
 

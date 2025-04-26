@@ -171,8 +171,11 @@ foreach ($examEntries as $e) {
             }
         ];
 
+        lastHue = 0;
+
         function randColour() {
-            return `hsl(${Math.floor(Math.random() * 360)},100%,50%)`
+            lastHue = (lastHue + 360 / targetLines.length) % 360;
+            return `hsl(${lastHue},100%,50%)`
         }
 
         for (const t of targetLines) {

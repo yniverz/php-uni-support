@@ -123,6 +123,11 @@ button:hover {
     border-color: #ddd;
 }
 
+.module-card.highlighted {
+    background: #e0f7fa;
+    border-color: #007BFF;
+}
+
 .req-list {
     margin: 10px 0;
     padding-left: 20px;

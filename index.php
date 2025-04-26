@@ -211,8 +211,12 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                         $mIndex = $entry['index'];
                         $mod = $entry['module'];
                         $moduleClass = "module-card";
+                        $highlighted = isset($mod['highlighted']) ? $mod['highlighted'] : false;
                         if ($mod['allDone']) {
                             $moduleClass .= " completed";
+                        }
+                        if ($highlighted) {
+                            $moduleClass .= " highlighted";
                         }
 
                         echo "<div class='$moduleClass'>";
@@ -220,6 +224,16 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                         if ($mod['allDone']) {
                             echo " <em>(Completed)</em>";
                         }
+                        // add checkbox for highlight (checked if highlighted))
+                        ?>
+                        <form method="post" style="display:inline;">
+                            <input type="hidden" name="toggle_highlight" value="1">
+                            <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
+                            <input type="checkbox" name="highlighted" value="1" <?php if ($highlighted)
+                                echo 'checked'; ?> onchange="this.form.submit();">
+                        </form>
+                        <?php
+
                         echo "<br />";
                         echo "Ideal Term: " . (int) $mod['idealTerm'];
 

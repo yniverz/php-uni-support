@@ -57,6 +57,7 @@ echo "CALSCALE:GREGORIAN\r\n";
 
 foreach ($data['modules'] as $mod) {
     $moduleName = $mod['name'];
+    $notes = $mod['notes'] ?? '';
     foreach ($mod['requirements'] as $req) {
         if (!empty($req['date'])) {
             $desc = $req['description'];
@@ -73,6 +74,11 @@ foreach ($data['modules'] as $mod) {
             echo "DTSTART;VALUE=DATE:$dt\r\n";
             echo "DTEND;VALUE=DATE:$dt\r\n"; // Full-day
             echo "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n";
+
+            if (!empty($notes)) {
+                echo "DESCRIPTION:Module Notes: " . addcslashes($notes, ",;\\") . "\r\n";
+            }
+
             echo "END:VEVENT\r\n";
         }
     }

@@ -179,6 +179,18 @@ if ($isEditMode) {
     }
 }
 
+if (isset($_POST['change_password'])) {
+    $newPassword = trim($_POST['change_password'] ?? '');
+
+    if ($newPassword !== '') {
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $userData[$_SESSION['username']]['password'] = $hashedPassword;
+        saveData($userData, $userDataFile);
+        header("Location: index.php");
+        exit;
+    }
+}
+
 // Requirement toggle (always allowed, even in view mode)
 if (isset($_POST['toggle_req'])) {
     $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);

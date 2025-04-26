@@ -11,6 +11,23 @@ body {
     color: #333;
 }
 
+footer {
+    text-align: center;
+    padding: 20px 0;
+    background: #fff;
+    border-top: 1px solid #ccc;
+    position: relative;
+}
+
+footer a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
 .container {
     max-width: 900px;
     margin: 40px auto;

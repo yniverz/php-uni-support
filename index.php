@@ -35,12 +35,14 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
             const STORAGE_KEY = 'scrollPositionData';
             let scrollTimeout;
 
+            var currentUrl = window.location.href.split('?')[0];
+
             // Save scroll position with debounce (after scrolling ends)
             window.addEventListener('scroll', () => {
                 clearTimeout(scrollTimeout);
                 scrollTimeout = setTimeout(() => {
                     const scrollData = {
-                        url: window.location.href,
+                        url: currentUrl,
                         scrollY: window.scrollY
                     };
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(scrollData));
@@ -53,7 +55,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                 if (saved) {
                     try {
                         const { url, scrollY } = JSON.parse(saved);
-                        if (url === window.location.href) {
+                        if (url === currentUrl) {
                             window.scrollTo({ top: scrollY, behavior: 'smooth' });
                         }
                     } catch (e) {
@@ -63,6 +65,18 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
             });
         })();
     </script>
+    <?php
+    // if not edit mode, put javascript that will listen to key "e" and switch to edit mode
+    if (!$isEditMode) {
+        echo "<script>
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'e') {
+                    window.location.href = '?mode=edit';
+                }
+            });
+        </script>";
+    }
+    ?>
 </head>
 
 <body>

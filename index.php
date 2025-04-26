@@ -37,46 +37,55 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
 
                 var currentUrl = window.location.href.split('?')[0];
 
-                // Save scroll position with debounce (after scrolling ends)
-                window.addEventListener('scroll', () => {
-                    clearTimeout(scrollTimeout);
-                    scrollTimeout = setTimeout(() => {
-                        const scrollData = {
-                            url: currentUrl,
-                            scrollY: window.scrollY
-                        };
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(scrollData));
-                    }, 200); // 200ms after scroll stops
-                });
-
                 // On page load, restore scroll position if URL matches
                 window.addEventListener('load', () => {
                     const saved = localStorage.getItem(STORAGE_KEY);
                     if (saved) {
                         try {
-                            const { url, scrollY } = JSON.parse(saved);
+                            const { url, scrollPercentage } = JSON.parse(saved);
                             if (url === currentUrl) {
-                                window.scrollTo({ top: scrollY, behavior: 'smooth' });
+                                console.log('Restoring scroll position:', scrollPercentage);
+                                setTimeout(() => {
+                                    // Use setTimeout to ensure the scroll position is set after the page has fully loaded
+                                    window.scrollTo({ 
+                                        top: Math.round(scrollPercentage * document.body.scrollHeight), 
+                                        behavior: 'instant'
+                                    });
+                                }, 100);
                             }
                         } catch (e) {
                             console.error('Failed to parse scroll position data:', e);
                         }
                     }
                 });
-            })();
-        </script>
-        <?php
-        // if not edit mode, put javascript that will listen to key "e" and switch to edit mode
-        if (!$isEditMode) {
-            echo "<script>
-                document.addEventListener('keydown', function (event) {
-                    if (event.key === 'e') {
-                        window.location.href = '?mode=edit';
+
+                // Save scroll position with debounce (after scrolling ends)
+                // save scroll position in percentage of the page
+                window.addEventListener('scroll', () => {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        const scrollData = {
+                            url: currentUrl,
+                            scrollPercentage: window.scrollY / document.body.scrollHeight
+                        };
+                        console.log('Saving scroll position:', scrollData);
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(scrollData));
+                    }, 200); // 200ms after scroll stops
+                });
+
+                // Handle "e" key for edit mode
+                window.addEventListener('keydown', function (event) {
+                    if (event.key === 'e' && event.target.tagName !== 'TEXTAREA' && event.target.tagName !== 'INPUT') {
+                        // window.location.href = '?mode=edit';
+                        // toggle edit mode
+                        const currentUrl = window.location.href;
+                        const newUrl = currentUrl.includes('?mode=edit') ? currentUrl.replace('?mode=edit', '') : currentUrl + '?mode=edit';
+                        window.history.pushState({ path: newUrl }, '', newUrl);
+                        window.location.reload();
                     }
                 });
-            </script>";
-        }
-        ?>
+            })();
+        </script>
     </head>
 
     <body>
@@ -346,10 +355,19 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                                 </label>
                                 <button type="submit" name="add_requirement">Add Requirement</button>
                             </form>
-                            <?php
-                        }
 
-                        echo "</div>"; // end module card
+                            <form method="post" class="form-inline">
+                                <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
+                                <label>Notes:
+                                    <input type="text" name="notes" value="<?php echo htmlspecialchars($mod['notes'] ?? ''); ?>" style="width:200px;">
+                                </label>
+                                <button type="submit" name="save_notes">Save</button>
+                            </form>
+                            <?php
+                        } else if (isset($mod['notes'])) {
+                            echo "<p><strong>Notes:</strong> " . htmlspecialchars($mod['notes'] ?? '') . "</p>";
+                        }
+                        echo "</div>"; // end module-card
                     }
 
                     $haveCreditsSoFar = getCompletedCreditsUpToTerm($data['modules'], $termNumber);
@@ -380,33 +398,33 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
             ?>
         </div> <!-- end container -->
 
+        <footer>
+            <a id="change_password">Change Password</a>
+            <p>Created by <a href="https://github.com/yniverz">yniverz</a></p>
+            <p>Version <?php echo htmlspecialchars(file_get_contents(__DIR__ . '/VERSION')); ?></p>
+
+
+            <script>
+                // when change_password is clicked, show prompt for new password and then send to server
+                document.getElementById('change_password').addEventListener('click', function () {
+                    const newPassword = prompt("Enter new password:");
+                    if (newPassword) {
+                        const form = document.createElement('form');
+                        form.method = 'post';
+                        form.action = '';
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'change_password';
+                        input.value = newPassword;
+                        form.appendChild(input);
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
+
+            </script>
+        </footer>
+
     </body>
-
-    <footer>
-        <a id="change_password">Change Password</a>
-        <p>Created by <a href="https://github.com/yniverz">yniverz</a></p>
-        <p>Version <?php echo htmlspecialchars(file_get_contents(__DIR__ . '/VERSION')); ?></p>
-
-
-        <script>
-            // when change_password is clicked, show prompt for new password and then send to server
-            document.getElementById('change_password').addEventListener('click', function () {
-                const newPassword = prompt("Enter new password:");
-                if (newPassword) {
-                    const form = document.createElement('form');
-                    form.method = 'post';
-                    form.action = '';
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'change_password';
-                    input.value = newPassword;
-                    form.appendChild(input);
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-
-        </script>
-    </footer>
 
 </html>

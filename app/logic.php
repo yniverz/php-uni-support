@@ -191,8 +191,30 @@ if (isset($_POST['change_password'])) {
     }
 }
 
+// save or add note to module
+elseif (isset($_POST['notes'])) {
+    $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
+    $notes = trim($_POST['notes'] ?? '');
+
+    if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
+        if ($notes !== '') {
+            $data['modules'][$moduleIndex]['notes'] = $notes;
+        } else {
+            unset($data['modules'][$moduleIndex]['notes']);
+        }
+        saveData($data, $jsonFile);
+    }
+
+    $redirectUrl = 'index.php';
+    if ($isEditMode) {
+        $redirectUrl .= '?mode=edit';
+    }
+    header("Location: " . $redirectUrl);
+    exit;
+}
+
 // toggle_highlight, toggles "highlighted" key in module, or sets to true if not set
-if (isset($_POST['toggle_highlight'])) {
+elseif (isset($_POST['toggle_highlight'])) {
     $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
     if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
         $highlighted = $data['modules'][$moduleIndex]['highlighted'] ?? false;
@@ -209,7 +231,7 @@ if (isset($_POST['toggle_highlight'])) {
 }
 
 // Requirement toggle (always allowed, even in view mode)
-if (isset($_POST['toggle_req'])) {
+elseif (isset($_POST['toggle_req'])) {
     $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
     $reqIndex = (int) ($_POST['reqIndex'] ?? -1);
 

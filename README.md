@@ -37,17 +37,40 @@ All data (user accounts and module information) is stored in JSON files statical
 - Passwords are hashed for security.
 - After registration, users can log in to their accounts.
 
+### Edit Mode
+Edit mode can be activated by the respective link at the top, or by pressing the `e` key.
+
 ### Module Management
-- Users can view available modules and their requirements.
-- Users can add modules to their profile and requirements to those modules.
-- A Requirement can be any task, such as a project, exam, or assignment.
-- Users can mark requirements as completed.
-- Users can view their progress in terms of completed requirements and credits earned.
-- Users can delete modules and requirements.
+Users can
+- add/view/update/delete modules to their profile and requirements to those modules
+    - A Requirement can be any task, such as a project, exam, assignment or even just a deadline
+- mark requirements as completed
+- highlight requirements (checkbox next to the name)
+- view a summary of the progress in terms of completed requirements, credits earned and the average grade
+
+## Constraints
+- A grade can only be entered if the requirement has more than 0 credits and is marked as completed.
+- You can only ever edit one requirement at a time, and will have to hit `Update` before you can edit another one.
+
+### Requirement list
+Users can `View All Requirements by Date` to see all their requirements sorted by date with helpful information like how many days are left or hoe many days are inbetween two requirements.
+
+### Statistics and Charts
+- The application provides a summary of completed requirements and credits earned under the `Stats` page.
+- It also includes charts to visualize progress over time including:
+    - linear lines for the set targets
+    - lines for the actual and planned progress
+    - Grade averages over time
+
+## Target Terms
+A target term is a possible term where the user wants to have reached the target credits. Users can set multiple target terms, and the application will calculate the required credits per term to reach the target and show that below each term and in the chart.
+
+### Interacting with other users
+Users have the option to set an `id` for each module and select Usernames to share information with at the top in edit mode (putting `*` as shared username will share with every user). The id will be shown to other users, and modules with the same id in the same term will show a handy note that the respective other user is also working on this module at this time.
 
 ### iCal Integration
 - You can add the requirements with dates as events to your calendar using the iCal path `/calendar.ics?username=USERNAME&password=PASSWORD`.
-- Just put this link (with your domain and username/password) into your calendar app and it will automatically add the events to your calendar.
+- Just put this link (with your domain/path, username and password) into your calendar app and it will automatically add the events to your calendar.
 
 ## License
 

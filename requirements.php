@@ -197,9 +197,9 @@ function getTimeBetween($startDateStr, $endDateStr)
             <table style="width:100%; border-collapse:collapse;">
                 <thead>
                     <tr style="border-bottom:1px solid #ccc;">
-                        <th style="text-align:left; padding:8px;">Time<br>Until</th>
-                        <th style="text-align:left; padding:8px;">Time<br>Between</th>
-                        <th style="text-align:left; padding:8px;">Date</th>
+                        <th style="text-align:left; width:90px">Time<br>Until</th>
+                        <th style="text-align:left; padding:8px;">Time<br>Delta</th>
+                        <th style="text-align:left; width:100px">Date</th>
                         <th style="text-align:left; padding:8px;">Requirement</th>
                         <th style="text-align:left; padding:8px;">Term: Module</th>
                         <th style="text-align:left; padding:8px;">Credits</th>
@@ -233,7 +233,7 @@ function getTimeBetween($startDateStr, $endDateStr)
                         ?>
                         <tr style="border-bottom:1px solid #eee; <?php echo $rowStyle; ?>">
                             <!-- Time Until -->
-                            <td style="padding:8px; <?php echo $timeStyle; ?>">
+                            <td style="<?php echo $timeStyle; ?>">
                                 <?php echo $timeStr; ?>
                             </td>
 
@@ -251,7 +251,7 @@ function getTimeBetween($startDateStr, $endDateStr)
                                 ?>
                             </td>
 
-                            <td style="padding:8px;"><?php echo $dateDisplay; ?></td>
+                            <td style=""><?php echo $dateDisplay; ?></td>
                             <td style="padding:8px;"><?php echo $desc; ?></td>
                             <td style="padding:8px;"><?php echo $term; ?>: <?php echo $mod; ?></td>
                             <td style="padding:8px;"><?php echo $credits === 0 ? '' : $credits; ?></td>

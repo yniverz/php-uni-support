@@ -5,6 +5,7 @@
 
 # App Specific files
 app/users.json
+app/global_module_ids.json
 app/users/
 
 # Apple files

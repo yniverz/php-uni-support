@@ -91,4 +91,11 @@ if ($isLoggedIn) {
         $data = $defaultData;
         file_put_contents($jsonFile, json_encode($defaultData, JSON_PRETTY_PRINT));
     }
+
+    // load global module id file
+    $globalModuleIDFile = __DIR__ . '/global_module_ids.json';
+    if (!file_exists($globalModuleIDFile)) {
+        file_put_contents($globalModuleIDFile, json_encode([], JSON_PRETTY_PRINT));
+    }
+    $globalModuleIDs = json_decode(file_get_contents($globalModuleIDFile), true);
 }

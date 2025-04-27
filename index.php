@@ -240,16 +240,22 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                         }
 
                         echo "<div class='$moduleClass'>";
-                        echo "<strong>" . htmlspecialchars($mod['name']) . "</strong>";
+                        // echo "<strong>" . htmlspecialchars($mod['name']) . "</strong>";
+                        if ($isEditMode) {
+                            ?>
+                            <form method="post" style="display:inline;">
+                                <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
+                                <strong>
+                                    <input type="text" name="new_module_name" value="<?php echo htmlspecialchars($mod['name']); ?>" required />
+                                </strong>
+                                <button type="submit" name="save_module_name">Save</button>
+                            </form>
+                            <?php
+                        } else {
+                            echo "<strong>" . htmlspecialchars($mod['name']) . "</strong>";
+                        }
                         if ($mod['allDone']) {
                             echo " <em>(Completed)</em>";
-                        }
-
-                        if (isset($mod['id']) && $mod['id'] !== '') {
-                            $similarUsers = getUsersWithModuleID($_SESSION['username'], $mod['id'], $mod['term'], $userData);
-                            if (!empty($similarUsers)) {
-                                echo "<br />You will join " . htmlspecialchars(implode(', ', $similarUsers));
-                            }
                         }
 
                         // add checkbox for highlight (checked if highlighted))
@@ -262,6 +268,14 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                         </form>
                         <?php
 
+                        if (isset($mod['id']) && $mod['id'] !== '') {
+                            $similarUsers = getUsersWithModuleID($_SESSION['username'], $mod['id'], $mod['term'], $userData);
+                            if (!empty($similarUsers)) {
+                                echo $mod['allDone'] ? "You joined: " : "You will join: ";
+                                echo htmlspecialchars(implode(', ', $similarUsers));
+                            }
+                        }
+
                         echo "<br />";
                         echo "Ideal Term: " . (int) $mod['idealTerm'];
 
@@ -271,8 +285,16 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                             <!-- give optional id to module -->
                             <form method="post" class="form-inline">
                                 <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
+                                <input type="hidden" name="module_name" value="<?php echo htmlspecialchars($mod['name']); ?>">
                                 <label>Module ID:
-                                    <input type="text" name="module_id" value="<?php echo htmlspecialchars($mod['id'] ?? ''); ?>" style="width:60px;">
+                                    <input type="text" name="module_id" value="<?php echo htmlspecialchars($mod['id'] ?? ''); ?>" style="width:120px;" list="suggestions">
+                                    <datalist id="suggestions">
+                                        <?php
+                                        foreach ($globalModuleIDs as $id) {
+                                            echo "<option value='" . htmlspecialchars($id) . "'>";
+                                        }
+                                        ?>
+                                    </datalist>
                                 </label>
                                 <button type="submit" name="save_module_id">Save</button>
                             </form>

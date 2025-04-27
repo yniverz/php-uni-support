@@ -27,7 +27,7 @@ if ($isEditMode) {
     }
 
     // Update semester targets
-    if (isset($_POST['update_semester_targets'])) {
+    else if (isset($_POST['update_semester_targets'])) {
         $targetsStr = $_POST['semesterTargets'] ?? '';
         $targetsArr = array_map('trim', explode(',', $targetsStr));
         $filtered = [];
@@ -44,7 +44,7 @@ if ($isEditMode) {
     }
 
     // Add a new module
-    if (isset($_POST['add_module'])) {
+    else if (isset($_POST['add_module'])) {
         $moduleName = trim($_POST['moduleName'] ?? '');
         $idealTerm = (int) ($_POST['idealTerm'] ?? 1);
         $assignedTerm = (int) ($_POST['assignedTerm'] ?? 1);
@@ -76,7 +76,7 @@ if ($isEditMode) {
     }
 
     // Reassign module to different term
-    if (isset($_POST['reassign_module'])) {
+    else if (isset($_POST['reassign_module'])) {
         $moduleIndex = (int) ($_POST['moduleIndexTerm'] ?? -1);
         $newTerm = (int) ($_POST['newTerm'] ?? 1);
         if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
@@ -88,8 +88,30 @@ if ($isEditMode) {
         exit;
     }
 
+    else if (isset($_POST['new_module_name'])) {
+        $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
+        $newName = trim($_POST['new_module_name'] ?? '');
+        if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex]) && $newName !== '') {
+            // Check uniqueness
+            $unique = true;
+            foreach ($data['modules'] as $m) {
+                if (strcasecmp($m['name'], $newName) === 0) {
+                    $unique = false;
+                    echo "Module name already exists.";
+                    break;
+                }
+            }
+            if ($unique) {
+                $data['modules'][$moduleIndex]['name'] = $newName;
+                saveData($data, $jsonFile);
+            }
+        }
+        header("Location: index.php?mode=edit");
+        exit;
+    }
+
     // Delete module
-    if (isset($_POST['delete_module'])) {
+    else if (isset($_POST['delete_module'])) {
         $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
         if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
             array_splice($data['modules'], $moduleIndex, 1);
@@ -100,7 +122,7 @@ if ($isEditMode) {
     }
 
     // Add a new sub-requirement
-    if (isset($_POST['add_requirement'])) {
+    else if (isset($_POST['add_requirement'])) {
         $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
         $description = trim($_POST['requirement_desc'] ?? '');
         $credits = (float) ($_POST['requirement_credits'] ?? 0);
@@ -123,7 +145,7 @@ if ($isEditMode) {
     }
 
     // Update requirement (description, credits, date, done/not-done)
-    if (isset($_POST['update_requirement'])) {
+    else if (isset($_POST['update_requirement'])) {
         $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
         $reqIndex = (int) ($_POST['reqIndex'] ?? -1);
         if (
@@ -162,7 +184,7 @@ if ($isEditMode) {
     }
 
     // Delete requirement
-    if (isset($_POST['delete_requirement'])) {
+    else if (isset($_POST['delete_requirement'])) {
         $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
         $reqIndex = (int) ($_POST['reqIndex'] ?? -1);
 
@@ -177,6 +199,94 @@ if ($isEditMode) {
         header("Location: index.php?mode=edit");
         exit;
     }
+
+    // save or add note to module
+    elseif (isset($_POST['notes'])) {
+        $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
+        $notes = trim($_POST['notes'] ?? '');
+
+        if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
+            if ($notes !== '') {
+                $data['modules'][$moduleIndex]['notes'] = $notes;
+            } else {
+                unset($data['modules'][$moduleIndex]['notes']);
+            }
+            saveData($data, $jsonFile);
+        }
+
+        header("Location: index.php?mode=edit");
+        exit;
+    }
+
+    else if (isset($_POST['share_usernames'])) {
+        $usernames = trim($_POST['share_usernames'] ?? '');
+        $usernamesArr = array_map('trim', explode(',', $usernames));
+        $filtered = [];
+        foreach ($usernamesArr as $val) {
+            if ($val !== '') {
+                $filtered[] = $val;
+            }
+        }
+        $userData[$_SESSION['username']]['share_usernames'] = $filtered;
+        saveData($userData, $userDataFile);
+
+        header("Location: index.php?mode=edit");
+        exit;
+    }
+
+    else if (isset($_POST['module_id'])) {
+        $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
+        $moduleName = trim($_POST['module_name'] ?? '');
+        $moduleId = trim($_POST['module_id'] ?? '');
+
+        // check if moduleId exists in globalModuleIDs
+        if (!in_array($moduleId, $globalModuleIDs)) {
+
+            // get copy of $globalModuleIDs
+            $toBeRemoved = array_unique($globalModuleIDs);
+
+            // iterate through all users and get a list of all used ids
+            $allUsedIDs = [];
+            foreach ($userData as $username => $user) {
+                $userJsonFile = __DIR__ . '/users/' . $user['userid'] . '.json';
+                if (file_exists($userJsonFile)) {
+                    $temp_data = json_decode(file_get_contents($userJsonFile), true);
+                    foreach ($temp_data['modules'] as $module) {
+                        if (isset($module['id'])) {
+                            $allUsedIDs[] = $module['id'];
+                            echo "found id " . $module['id'] . "<br>";
+                        }
+                    }
+                }
+            }
+
+            // get list of all entries in $globalModuleIDs that are not in $allUsedIDs
+            $toBeRemoved = array_diff($toBeRemoved, $allUsedIDs);
+            // remove duplicates
+            $toBeRemoved = array_unique($toBeRemoved);
+
+            // remove all ids from $globalModuleIDs that are in toBeRemoved
+            foreach ($toBeRemoved as $id) {
+                echo "removing $id<br>";
+                unset($globalModuleIDs[array_search($id, $globalModuleIDs)]);
+            }
+
+            // moduleId does not exist, insert it
+            $globalModuleIDs[] = $moduleId;
+            
+            // save globalModuleIDs
+            file_put_contents($globalModuleIDFile, json_encode($globalModuleIDs, JSON_PRETTY_PRINT));
+        }
+
+        if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
+            $data['modules'][$moduleIndex]['id'] = $moduleId;
+            saveData($data, $jsonFile);
+        }
+
+        header("Location: index.php?mode=edit");
+        exit;
+    }
+
 }
 
 if (isset($_POST['change_password'])) {
@@ -189,65 +299,6 @@ if (isset($_POST['change_password'])) {
         header("Location: index.php");
         exit;
     }
-}
-
-// save or add note to module
-elseif (isset($_POST['notes'])) {
-    $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
-    $notes = trim($_POST['notes'] ?? '');
-
-    if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
-        if ($notes !== '') {
-            $data['modules'][$moduleIndex]['notes'] = $notes;
-        } else {
-            unset($data['modules'][$moduleIndex]['notes']);
-        }
-        saveData($data, $jsonFile);
-    }
-
-    $redirectUrl = 'index.php';
-    if ($isEditMode) {
-        $redirectUrl .= '?mode=edit';
-    }
-    header("Location: " . $redirectUrl);
-    exit;
-}
-
-else if (isset($_POST['share_usernames'])) {
-    $usernames = trim($_POST['share_usernames'] ?? '');
-    $usernamesArr = array_map('trim', explode(',', $usernames));
-    $filtered = [];
-    foreach ($usernamesArr as $val) {
-        if ($val !== '') {
-            $filtered[] = $val;
-        }
-    }
-    $userData[$_SESSION['username']]['share_usernames'] = $filtered;
-    saveData($userData, $userDataFile);
-
-    $redirectUrl = 'index.php';
-    if ($isEditMode) {
-        $redirectUrl .= '?mode=edit';
-    }
-    header("Location: " . $redirectUrl);
-    exit;
-}
-
-else if (isset($_POST['module_id'])) {
-    $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
-    $moduleId = trim($_POST['module_id'] ?? '');
-
-    if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
-        $data['modules'][$moduleIndex]['id'] = $moduleId;
-        saveData($data, $jsonFile);
-    }
-
-    $redirectUrl = 'index.php';
-    if ($isEditMode) {
-        $redirectUrl .= '?mode=edit';
-    }
-    header("Location: " . $redirectUrl);
-    exit;
 }
 
 // toggle_highlight, toggles "highlighted" key in module, or sets to true if not set

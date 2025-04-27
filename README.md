@@ -9,11 +9,9 @@ All data (user accounts and module information) is stored in JSON files statical
 
 ---
 
-![Main Page](https://github.com/user-attachments/assets/f44d5166-a9a2-426a-b1b1-ca4815b71070)
+![Main Page](https://github.com/user-attachments/assets/af463fe4-726e-45df-98ea-eaa2504c6409)
 
-![Date Summary](https://github.com/user-attachments/assets/330cb5f7-55ae-4967-98df-e2d442a3a9a0)
-
-
+![Requirements List](https://github.com/user-attachments/assets/2ff038e9-34ae-4032-8d08-ba5e0447f819)
 
 ---
 
@@ -45,8 +43,11 @@ Users can
 - add/view/update/delete modules to their profile and requirements to those modules
     - A Requirement can be any task, such as a project, exam, assignment or even just a deadline
 - mark requirements as completed
-- highlight requirements (checkbox next to the name)
+- highlight requirements blue (checkbox next to the name)
 - view a summary of the progress in terms of completed requirements, credits earned and the average grade
+
+<img width="909" alt="image" src="https://github.com/user-attachments/assets/d574498d-e6c5-4331-93ff-0ee5e076c216" />
+
 
 ## Constraints
 - A grade can only be entered if the requirement has more than 0 credits and is marked as completed.
@@ -61,6 +62,8 @@ Users can `View All Requirements by Date` to see all their requirements sorted b
     - linear lines for the set targets
     - lines for the actual and planned progress
     - Grade averages over time
+
+<img width="490" alt="Statistics Page" src="https://github.com/user-attachments/assets/8bbbb6e7-1416-4703-a959-4f40218cb923" />
 
 ## Target Terms
 A target term is a possible term where the user wants to have reached the target credits. Users can set multiple target terms, and the application will calculate the required credits per term to reach the target and show that below each term and in the chart.

@@ -132,6 +132,45 @@ function getTimeUntilDisplay($dateStr)
     return [$timeStr, $style];
 }
 
+function getTimeBetween($startDateStr, $endDateStr)
+{
+    if (!$startDateStr || !$endDateStr) {
+        // no date => blank
+        return ['', ''];
+    }
+    // Attempt to parse the date
+    $startDt = DateTime::createFromFormat('Y-m-d', $startDateStr);
+    $endDt = DateTime::createFromFormat('Y-m-d', $endDateStr);
+    if (!$startDt || !$endDt) {
+        // invalid or partial => no display
+        return ['', ''];
+    }
+
+    // Compare with "today"
+    $diff = $startDt->diff($endDt);
+    $days = $diff->days;        // absolute difference in days
+
+    // Build time string:
+    if ($days > 365 + 30) {
+        $years = floor($days / 365);
+        $remDays = $days % 365;
+        $months = floor($remDays / 30);
+        $timeStr = $years . 'y ' . $months . 'M';
+    } elseif ($days > 365) {
+        $years = floor($days / 365);
+        $remDays = $days % 365;
+        $timeStr = $years . 'y ' . $remDays . 'd';
+    } elseif ($days > 30) {
+        $months = floor($days / 30);
+        $remDays = $days % 30;
+        $timeStr = $months . 'M ' . $remDays . 'd';
+    } else {
+        $timeStr = $days . 'd';
+    }
+
+    return [$timeStr, ''];
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -159,16 +198,18 @@ function getTimeUntilDisplay($dateStr)
                 <thead>
                     <tr style="border-bottom:1px solid #ccc;">
                         <th style="text-align:left; padding:8px;">Time<br>Until</th>
+                        <th style="text-align:left; padding:8px;">Time<br>Between</th>
                         <th style="text-align:left; padding:8px;">Date</th>
                         <th style="text-align:left; padding:8px;">Requirement</th>
                         <th style="text-align:left; padding:8px;">Term: Module</th>
                         <th style="text-align:left; padding:8px;">Credits</th>
-                        <th style="text-align:left; padding:8px;">Done?</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($allRequirements as $req): ?>
-                        <?php
+                    <?php //foreach ($allRequirements as $req): ?>
+                    <?php
+                    $lastDate = '';
+                    foreach ($allRequirements as $req):
                         // Row styling for done or date < today => grey out
                         $rowStyle = '';
                         if ($req['done']) {
@@ -196,11 +237,24 @@ function getTimeUntilDisplay($dateStr)
                                 <?php echo $timeStr; ?>
                             </td>
 
+                            <!-- Time Between -->
+                            <td style="padding:8px; <?php echo $timeStyle; ?>">
+                                <?php
+                                if ($req['date'] && $lastDate) {
+                                    list($timeStr, $timeStyle) = getTimeBetween($req['date'], $lastDate);
+                                    echo $timeStr;
+                                } else {
+                                    echo '—';
+                                }
+
+                                $lastDate = $req['date'];
+                                ?>
+                            </td>
+
                             <td style="padding:8px;"><?php echo $dateDisplay; ?></td>
                             <td style="padding:8px;"><?php echo $desc; ?></td>
                             <td style="padding:8px;"><?php echo $term; ?>: <?php echo $mod; ?></td>
-                            <td style="padding:8px;"><?php echo $credits; ?></td>
-                            <td style="padding:8px;"><?php echo $done; ?></td>
+                            <td style="padding:8px;"><?php echo $credits === 0 ? '' : $credits; ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

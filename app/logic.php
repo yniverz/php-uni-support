@@ -213,6 +213,43 @@ elseif (isset($_POST['notes'])) {
     exit;
 }
 
+else if (isset($_POST['share_usernames'])) {
+    $usernames = trim($_POST['share_usernames'] ?? '');
+    $usernamesArr = array_map('trim', explode(',', $usernames));
+    $filtered = [];
+    foreach ($usernamesArr as $val) {
+        if ($val !== '') {
+            $filtered[] = $val;
+        }
+    }
+    $userData[$_SESSION['username']]['share_usernames'] = $filtered;
+    saveData($userData, $userDataFile);
+
+    $redirectUrl = 'index.php';
+    if ($isEditMode) {
+        $redirectUrl .= '?mode=edit';
+    }
+    header("Location: " . $redirectUrl);
+    exit;
+}
+
+else if (isset($_POST['module_id'])) {
+    $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
+    $moduleId = trim($_POST['module_id'] ?? '');
+
+    if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
+        $data['modules'][$moduleIndex]['id'] = $moduleId;
+        saveData($data, $jsonFile);
+    }
+
+    $redirectUrl = 'index.php';
+    if ($isEditMode) {
+        $redirectUrl .= '?mode=edit';
+    }
+    header("Location: " . $redirectUrl);
+    exit;
+}
+
 // toggle_highlight, toggles "highlighted" key in module, or sets to true if not set
 elseif (isset($_POST['toggle_highlight'])) {
     $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);

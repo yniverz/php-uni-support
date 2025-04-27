@@ -111,6 +111,17 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
 
             <?php if ($isEditMode): ?>
                 <!-- EDIT MODE: Show forms for changing settings -->
+                <h2>Account Settings</h2>
+                <!-- comma seperated list of usernames -->
+                <form method="post">
+                    <label>
+                        Sharing Usernames (comma-separated):
+                        <input type="text" name="share_usernames"
+                            value="<?php echo htmlspecialchars(implode(', ', $userData[$_SESSION['username']]['share_usernames'] ?? [])); ?>" required />
+                    </label>
+                    <button type="submit" name="update_share_usernames">Update</button>
+                </form>
+
                 <h2>Overall Degree Settings</h2>
                 <form method="post">
                     <label>
@@ -233,6 +244,14 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                         if ($mod['allDone']) {
                             echo " <em>(Completed)</em>";
                         }
+
+                        if (isset($mod['id']) && $mod['id'] !== '') {
+                            $similarUsers = getUsersWithModuleID($_SESSION['username'], $mod['id'], $mod['term'], $userData);
+                            if (!empty($similarUsers)) {
+                                echo "<br />You will join " . htmlspecialchars(implode(', ', $similarUsers));
+                            }
+                        }
+
                         // add checkbox for highlight (checked if highlighted))
                         ?>
                         <form method="post" style="display:inline;">
@@ -249,6 +268,16 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                         if ($isEditMode) {
                             echo "<br /><br />";
                             ?>
+                            <!-- give optional id to module -->
+                            <form method="post" class="form-inline">
+                                <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
+                                <label>Module ID:
+                                    <input type="text" name="module_id" value="<?php echo htmlspecialchars($mod['id'] ?? ''); ?>" style="width:60px;">
+                                </label>
+                                <button type="submit" name="save_module_id">Save</button>
+                            </form>
+                            <br />
+
                             <!-- Reassign or Delete Module Forms -->
                             <form method="post" class="form-inline" style="margin-bottom:5px;">
                                 <input type="hidden" name="moduleIndexTerm" value="<?php echo $mIndex; ?>">
@@ -330,7 +359,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                                         <input type="checkbox" name="req_done" value="1" <?php if ($done)
                                             echo 'checked'; ?>
                                             onchange="this.form.submit();">
-                                        <?php echo ($grade ? "$grade — " : "") . "$desc — Credits: $credits" . ($date ? " — ($date)" : ""); ?>
+                                        <?php echo ($grade ? "$grade — " : "") . "$desc" . ($credits === 0 ? "" : " — Credits: $credits") . ($date ? " — ($date)" : ""); ?>
                                     </form>
                                 </li>
                                 <?php

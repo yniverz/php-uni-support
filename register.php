@@ -40,6 +40,9 @@ if (isset($_POST['register_submit'])) {
     // 4) Check if username already exists in $userData
     elseif (isset($userData[$username])) {
         $registerError = "Username already taken. Please choose another.";
+    }
+    elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+        $registerError = "Username can only contain letters, numbers, and underscores.";
     } else {
         // 5) If all checks pass, hash the password and store it
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);

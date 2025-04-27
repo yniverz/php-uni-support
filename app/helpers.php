@@ -92,7 +92,7 @@ function getUsersWithModuleID($originUsername, $moduleID, $term, $userData)
     // add user to list if has module with same id in same term
     $usersWithModule = [];
     foreach ($userData as $username => $user) {
-        if ($username !== $originUsername && in_array($originUsername, $user['share_usernames'] ?? [])) {
+        if ($username !== $originUsername && (in_array($originUsername, $user['share_usernames'] ?? []) || in_array("*", $user['share_usernames'] ?? []))) {
             $userJsonFile = __DIR__ . '/users/' . $user['userid'] . '.json';
             if (file_exists($userJsonFile)) {
                 $data = json_decode(file_get_contents($userJsonFile), true);

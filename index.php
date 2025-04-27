@@ -430,7 +430,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
         <footer>
             <a id="change_password">Change Password</a>
             <p>Created by <a href="https://github.com/yniverz">yniverz</a></p>
-            <p>Version <?php echo htmlspecialchars(file_get_contents(__DIR__ . '/VERSION')); ?></p>
+            <p><?php echo htmlspecialchars(file_get_contents(__DIR__ . '/VERSION')); ?></p>
 
 
             <script>

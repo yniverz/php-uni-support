@@ -51,7 +51,7 @@ if (isset($_POST['action'])) {
                     // Remove from userData
                     unset($userData[$username]);
                     // Save changes
-                    saveUserData($userDataFile, $userData);
+                    saveData($userData, $userDataFile);
 
                     // Also optionally remove that user's data file
                     $userID = $_POST['userid'] ?? '';
@@ -70,9 +70,59 @@ if (isset($_POST['action'])) {
                 $newPass = generateRandomPassword(8);  // e.g. 8 chars
                 $hashed = password_hash($newPass, PASSWORD_DEFAULT);
                 $userData[$username]['password'] = $hashed;
-                saveUserData($userDataFile, $userData);
+                saveData($userData, $userDataFile);
 
                 $feedbackMsg = "Password for user '$username' reset to: <strong>$newPass</strong>";
+                break;
+            case 'edit_module_id':
+                // Assuming you have a function to edit module ID
+                $moduleID = $_POST['moduleID'] ?? '';
+                $newName = $_POST['newName'] ?? '';
+                if ($moduleID !== '' && $newName !== '') {
+                    // Check if the module ID exists in the globalModuleIDs
+                    if (!in_array($moduleID, $globalModuleIDs)) {
+                        $feedbackMsg = "Module ID '$moduleID' not found.";
+                        break;
+                    }
+                    // Check if the new name is valid
+                    if (in_array($newName, $globalModuleIDs)) {
+                        $feedbackMsg = "New name '$newName' already exists.";
+                        break;
+                    }
+
+
+                    // iterate through all user files and adjust the module ID
+                    foreach ($userData as $username => $user) {
+                        $userJsonFile = __DIR__ . '/app/users/' . $user['userid'] . '.json';
+                        if (file_exists($userJsonFile)) {
+                            $temp_data = json_decode(file_get_contents($userJsonFile), true);
+
+                            $didChange = false;
+                            foreach ($temp_data['modules'] as $moduleIndex => $module) {
+                                if (isset($module['id']) && $module['id'] == $moduleID) {
+                                    // Update the module ID
+                                    $temp_data['modules'][$moduleIndex]['id'] = $newName;
+                                    $didChange = true;
+                                }
+                            }
+
+                            if ($didChange) {
+                                saveData($temp_data, $userJsonFile);
+                            }
+                        }
+                    }
+
+                    // change in the globalModuleIDs array
+                    $globalModuleIDs = array_map(function($module) use ($moduleID, $newName) {
+                        return $module === $moduleID ? $newName : $module;
+                    }, $globalModuleIDs);
+                    // Save the updated globalModuleIDs
+                    saveData($globalModuleIDs, $globalModuleIDFile);
+                    
+                    $feedbackMsg = "Module ID '$moduleID' updated to '$newName'.";
+                } else {
+                    $feedbackMsg = "Invalid module ID or new name.";
+                }
                 break;
         }
     }
@@ -89,12 +139,6 @@ function generateRandomPassword($length = 8)
         $pwd .= $chars[random_int(0, strlen($chars) - 1)];
     }
     return $pwd;
-}
-
-// We'll define a function to save $userData
-function saveUserData($file, $dataArr)
-{
-    file_put_contents($file, json_encode($dataArr, JSON_PRETTY_PRINT));
 }
 
 // 6) HTML Output
@@ -160,6 +204,58 @@ function saveUserData($file, $dataArr)
                 </tbody>
             </table>
         <?php endif; ?>
+
+        <h2>Module ID's</h2>
+        <table border="1" cellpadding="5" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Module</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                // Assuming you have a function to get module data
+                // $globalModuleIDs
+                foreach ($globalModuleIDs as $moduleID):
+                    ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($moduleID); ?></td>
+                        <td>
+                            <?php $uuid = uniqid('btn_'); ?>
+                            <button id="<?php echo $uuid; ?>">Edit</button>
+                            <script>
+                                document.getElementById('<?php echo $uuid; ?>').addEventListener('click', function() {
+                                    // Your edit logic here
+                                    var newName = prompt('Edit Module ID:', '<?php echo htmlspecialchars($moduleID); ?>');
+                                    if (newName) {
+                                        // redirect post data
+                                        var form = document.createElement('form');
+                                        form.method = 'POST';
+                                        var input = document.createElement('input');
+                                        input.type = 'hidden';
+                                        input.name = 'action';
+                                        input.value = 'edit_module_id';
+                                        form.appendChild(input);
+                                        input = document.createElement('input');
+                                        input.type = 'hidden';
+                                        input.name = 'moduleID';
+                                        input.value = '<?php echo htmlspecialchars($moduleID); ?>';
+                                        form.appendChild(input);
+                                        input = document.createElement('input');
+                                        input.type = 'hidden';
+                                        input.name = 'newName';
+                                        input.value = newName;
+                                        form.appendChild(input);
+                                        document.body.appendChild(form);
+                                        form.submit();
+                                    }
+                                });
+                            </script>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
     </div>
 </body>
 

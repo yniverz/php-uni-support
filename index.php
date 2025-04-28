@@ -451,6 +451,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
 
         <footer>
             <a id="change_password">Change Password</a>
+            <p>See this Project on <a href="https://github.com/yniverz/php-uni-support">GitHub</a></p>
             <p>Created by <a href="https://github.com/yniverz">yniverz</a></p>
             <p><?php echo htmlspecialchars(file_get_contents(__DIR__ . '/VERSION')); ?></p>
 

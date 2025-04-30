@@ -269,11 +269,6 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                         <?php
 
                         if (isset($mod['id']) && $mod['id'] !== '') {
-                            // $similarUsers = getUsersWithModuleID($_SESSION['username'], $mod['id'], $mod['term'], $userData);
-                            // if (!empty($similarUsers)) {
-                            //     echo $mod['allDone'] ? "You joined: " : "You will join: ";
-                            //     echo htmlspecialchars(implode(', ', $similarUsers));
-                            // }
 
                             $similarUsers = getUsersWithModuleTerms($_SESSION['username'], $mod['id'], $userData);
                             // returns dict of username => list of integers which are terms
@@ -292,7 +287,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                                     echo $thisTermPrefix . $thisTerms;
                                 }
 
-                                $otherTermsPrefix = "Users in Other Terms: ";
+                                $otherTermsPrefix = "Students in Other Terms: ";
                                 $otherTerms = "";
                                 foreach ($similarUsers as $user => $terms) {
                                     if (in_array($mod['term'], $terms)) {

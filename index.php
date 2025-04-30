@@ -204,7 +204,6 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
             <?php
             // Now display the modules by term
             if (!empty($data['modules'])) {
-                sortModules($data['modules']);
 
                 // group by term
                 $modulesByTerm = [];
@@ -352,7 +351,6 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                         // show requirements
                         echo "<ul class='req-list'>";
                         
-                        sortRequirements($mod['requirements']);
                         foreach ($mod['requirements'] as $reqIndex => $req) {
                             $desc = htmlspecialchars($req['description']);
                             $credits = $req['credits'];

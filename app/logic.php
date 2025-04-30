@@ -103,6 +103,7 @@ if ($isEditMode) {
             }
             if ($unique) {
                 $data['modules'][$moduleIndex]['name'] = $newName;
+                sortModules($data['modules']);
                 saveData($data, $jsonFile);
             }
         }
@@ -115,6 +116,7 @@ if ($isEditMode) {
         $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
         if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
             array_splice($data['modules'], $moduleIndex, 1);
+            sortModules($data['modules']);
             saveData($data, $jsonFile);
         }
         header("Location: index.php?mode=edit");
@@ -138,6 +140,7 @@ if ($isEditMode) {
                 $newRequirement['date'] = $date;
             }
             $data['modules'][$moduleIndex]['requirements'][] = $newRequirement;
+            sortModules($data['modules']);
             saveData($data, $jsonFile);
         }
         header("Location: index.php?mode=edit");
@@ -177,6 +180,7 @@ if ($isEditMode) {
             }
 
             updateModuleCompletionStatus($data['modules'][$moduleIndex]);
+            sortModules($data['modules']);
             saveData($data, $jsonFile);
         }
         header("Location: index.php?mode=edit");
@@ -194,6 +198,7 @@ if ($isEditMode) {
         ) {
             array_splice($data['modules'][$moduleIndex]['requirements'], $reqIndex, 1);
             updateModuleCompletionStatus($data['modules'][$moduleIndex]);
+            sortModules($data['modules']);
             saveData($data, $jsonFile);
         }
         header("Location: index.php?mode=edit");
@@ -211,6 +216,7 @@ if ($isEditMode) {
             } else {
                 unset($data['modules'][$moduleIndex]['notes']);
             }
+            sortModules($data['modules']);
             saveData($data, $jsonFile);
         }
 
@@ -280,6 +286,7 @@ if ($isEditMode) {
 
         if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
             $data['modules'][$moduleIndex]['id'] = $moduleId;
+            sortModules($data['modules']);
             saveData($data, $jsonFile);
         }
 
@@ -307,6 +314,7 @@ elseif (isset($_POST['toggle_highlight'])) {
     if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
         $highlighted = $data['modules'][$moduleIndex]['highlighted'] ?? false;
         $data['modules'][$moduleIndex]['highlighted'] = !$highlighted;
+        sortModules($data['modules']);
         saveData($data, $jsonFile);
     }
 
@@ -332,6 +340,7 @@ elseif (isset($_POST['toggle_req'])) {
         $data['modules'][$moduleIndex]['requirements'][$reqIndex]['done'] = $isDone;
 
         updateModuleCompletionStatus($data['modules'][$moduleIndex]);
+        sortModules($data['modules']);
         saveData($data, $jsonFile);
     }
 

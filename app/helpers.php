@@ -182,6 +182,13 @@ function updateModuleCompletionStatus(&$module)
  */
 function sortModules(array &$modules): void
 {
+    // sort requirements first
+    foreach ($modules as &$module) {
+        sortRequirements($module['requirements']);
+    }
+    unset($module);   // break reference to last element
+    
+    // sort modules by earliest requirement date
     usort($modules, function ($a, $b) {
         $earliestA = getEarliestDate($a['requirements'] ?? []);
         $earliestB = getEarliestDate($b['requirements'] ?? []);
@@ -275,7 +282,7 @@ function buildSharedProgressDatasets(bool $showShared, ?array $userData): array
     }
 
     $origin    = $_SESSION['username'] ?? '';
-    $usersDir  = __DIR__ . '/users/';          // …/app/users/
+    $usersDir  = __DIR__ . '/users/';
 
     /* One common label range so all lines have identical length */
     $labelRange = [1];

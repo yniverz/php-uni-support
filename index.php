@@ -293,7 +293,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                                     if (in_array($mod['term'], $terms)) {
                                         continue; // skip this user
                                     }
-                                    $otherTerms .= htmlspecialchars($user) . " (Term: " . implode(", ", $terms) . "), ";
+                                    $otherTerms .= "<i>" . htmlspecialchars($user) . "</i> (Term: " . implode(", ", $terms) . "), ";
                                 }
 
                                 $otherTerms = rtrim($otherTerms, ", ");

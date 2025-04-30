@@ -37,6 +37,12 @@ if ($isEditMode) {
                 $filtered[] = $valInt;
             }
         }
+        
+        // sort descending
+        rsort($filtered);
+        // remove duplicates
+        $filtered = array_unique($filtered);
+
         $data['semesterTargets'] = $filtered;
         saveData($data, $jsonFile);
         header("Location: index.php?mode=edit");

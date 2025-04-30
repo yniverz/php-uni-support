@@ -135,7 +135,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
 
                 <form method="post">
                     <label>
-                        Target Terms (comma-separated, e.g. "6,9"):
+                        Target Terms (comma-separated, e.g. "9,6"):
                         <input type="text" name="semesterTargets"
                             value="<?php echo htmlspecialchars(implode(', ', $data['semesterTargets'])); ?>" required />
                     </label>
@@ -456,14 +456,14 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                     echo "<p><strong>Credits after Term $termNumber:</strong></p>";
                     echo "<table style='border-collapse: collapse;'>";
                     echo "<tr><td style='padding: 4px 10px;'>Have:</td><td style='padding: 4px 10px;'>$haveCreditsSoFar</td></tr>";
-                    echo "<tr><td style='padding: 4px 10px;'>Want:</td><td style='padding: 4px 10px;'>$wantCreditsSoFar</td></tr>";
+                    echo "<tr" . ($haveCreditsSoFar >= $wantCreditsSoFar ? " style='color: grey;'" : "") . "><td style='padding: 4px 10px;'>Want:</td><td style='padding: 4px 10px;'>$wantCreditsSoFar</td></tr>";
 
                     foreach ($targets as $target) {
                         $ideal = (int) floor(($termNumber / $target) * $neededCredits);
                         if ($ideal > $neededCredits) {
                             $ideal = $neededCredits;
                         }
-                        echo "<tr><td style='padding: 4px 10px;'>Target $target:</td><td style='padding: 4px 10px;'>$ideal</td></tr>";
+                        echo "<tr" . ($haveCreditsSoFar >= $ideal ? " style='color: grey;'" : "") . "><td style='padding: 4px 10px;'>Target $target:</td><td style='padding: 4px 10px;'>$ideal</td></tr>";
                     }
 
                     echo "</table>";

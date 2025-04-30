@@ -13,16 +13,6 @@ require __DIR__ . '/app/logic.php';
 
 $modules = $data['modules'] ?? [];
 
-
-//---------------------------------------------------------
-// 0) Shared progress data
-//---------------------------------------------------------
-
-$showShared = isset($_GET['showShared']);
-$sharedProgressDatasets = buildSharedProgressDatasets($showShared, $userData);
-$sharedGradeDatasets    = buildSharedGradeDatasets($showShared, $userData);
-
-
 //---------------------------------------------------------
 // 1) Per‑term statistics (planned / earned / missing)
 //---------------------------------------------------------
@@ -112,10 +102,21 @@ $runSum = $runCred = 0.0;
 foreach ($examEntries as $e) {
     $runSum += $e['grade'] * $e['credits'];
     $runCred += $e['credits'];
-    $gradeLabels[] = $e['module'] . ' – ' . $e['desc'];
+    $gradeLabels[] = $e['module'] . ' - ' . $e['desc'];
     $gradeProgress[] = round($runSum / $runCred, 3);
     $actualGrades[] = $e['grade'];
 }
+
+
+//---------------------------------------------------------
+// 4) Shared progress data
+//---------------------------------------------------------
+
+$showShared = isset($_GET['showShared']);
+$myExamCount           = count($gradeProgress);
+$sharedProgressDatasets = buildSharedProgressDatasets($showShared, $userData);
+$sharedGradeDatasets    = buildSharedGradeDatasets($showShared, $userData, $myExamCount);
+
 
 //---------------------------------------------------------
 // HTML output
@@ -151,6 +152,44 @@ foreach ($examEntries as $e) {
             </label>
         </form>
     </div>
+
+    <script>
+        /* ------- custom plugin that prints the dataset label right of its last point ---- */
+        const lineLabelPlugin = {
+            id: 'lineLabel',
+
+            afterDatasetsDraw(chart, args, opts) {
+                const { ctx }   = chart;
+                const  cfg      = opts || {};
+                const  font     = cfg.font || '10px sans-serif';
+                const  Xoffset   = cfg.Xoffset ?? -2;
+                const  Yoffset    = cfg.Yoffset ?? -5;
+
+                chart.data.datasets.forEach((ds, idx) => {
+                    if (!chart.isDatasetVisible(idx)) return;
+
+                    /* skip non-line types (e.g. bar) or explicit opt-outs */
+                    const meta = chart.getDatasetMeta(idx);
+                    if (meta.type !== 'line' || ds.noLineLabel) return;
+
+                    const lastElem = meta.data[meta.data.length - 1];
+                    if (!lastElem) return;
+
+                    ctx.save();
+                    ctx.font = font;
+                    ctx.fillStyle = cfg.color || ds.borderColor || '#000';
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(ds.label, lastElem.x + Xoffset, lastElem.y + Yoffset);
+                    ctx.restore();
+                });
+            }
+        };
+
+        /* register once before you create any charts */
+        Chart.register(lineLabelPlugin);
+    </script>
+
 
     <script>
         document.getElementById('toggleShared')
@@ -232,7 +271,8 @@ foreach ($examEntries as $e) {
                         display: true,
                         text: 'Cumulative Credits vs. Targets'
                     },
-                    legend: { position: 'bottom' }
+                    legend: { position: 'bottom' },
+                    lineLabel: { font: '11px sans-serif', color: 'rgba(50,50,50,0.8)' }
                 },
                 scales: {
                     y: { beginAtZero: true }
@@ -278,10 +318,14 @@ foreach ($examEntries as $e) {
 
         // -------- Chart 3: grade average + individual grades --------
         if (gradeProgress.length) {
+
+            const ownAvgXY    = gradeProgress.map((y, i) => ({ x: i, y }));
+            const ownGradesXY = actualGrades .map((y, i) => ({ x: i, y }));
+
             const gradeDatasets = [
                 {
                     label: 'Average (cumulative)',
-                    data: gradeProgress,
+                    data: ownAvgXY,
                     borderColor: 'rgba(231,76,60,1)',
                     backgroundColor: 'rgba(231,76,60,0.25)',
                     tension: 0,
@@ -291,7 +335,7 @@ foreach ($examEntries as $e) {
                 },
                 {
                     label: 'Exam grade',
-                    data: actualGrades,
+                    data: ownGradesXY,
                     showLine: false,
                     borderColor: 'rgba(52,152,219,0.9)',
                     backgroundColor: 'rgba(52,152,219,0.9)',
@@ -322,6 +366,13 @@ foreach ($examEntries as $e) {
                         legend: { position: 'bottom' },
                         tooltip: {
                             callbacks: {
+                                // title: items => gradeLabels[ items[0].dataIndex ],
+                                title: items => {
+                                    const dsLabel = items[0].dataset.label;
+                                    return dsLabel === 'Exam grade' || dsLabel === 'Average (cumulative)'
+                                        ? gradeLabels[ items[0].dataIndex ]
+                                        : '';
+                                },
                                 label: ctx => {
                                     const val = ctx.parsed.y.toFixed(2);
                                     return ctx.dataset.label === 'Average (cumulative)' ? 'Ø ' + val : val;
@@ -331,7 +382,7 @@ foreach ($examEntries as $e) {
                     },
                     scales: {
                         y: { reverse: true, suggestedMin: 1 },
-                        x: { display: false }
+                        x: { type: 'linear', display: false }
                     }
                 }
             })

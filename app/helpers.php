@@ -351,17 +351,19 @@ function buildSharedProgressDatasets(bool $showShared, ?array $userData): array
 }
 
 /**
- * Build grey-line datasets that show the cumulative grade average
- * of every user who shares data with the logged-in user.
+ * Build grey-line datasets that show each shared user’s running grade average,
+ * scaled so their first point lines up with your first exam and their last
+ * point lines up with your last exam.
  *
- * @param bool  $showShared  state of the checkbox / GET param
- * @param array $userData    master user table (loaded in logic.php)
- * @return array             Chart.js-ready datasets
+ * @param bool  $showShared      state of the checkbox / GET param
+ * @param array $userData        master user table
+ * @param int   $originCount     how many exams *you* have (points on x-axis)
+ * @return array                 Chart.js-ready datasets
  */
-function buildSharedGradeDatasets(bool $showShared, ?array $userData): array
+function buildSharedGradeDatasets(bool $showShared, ?array $userData, int $originCount): array
 {
     $datasets = [];
-    if (!$showShared || !is_array($userData)) {
+    if (!$showShared || $originCount < 1 || !is_array($userData)) {
         return $datasets;
     }
 
@@ -378,12 +380,12 @@ function buildSharedGradeDatasets(bool $showShared, ?array $userData): array
         $uData = json_decode(file_get_contents($file), true);
         if (!is_array($uData)) continue;
 
-        /* --- harvest that user's finished exams --------------------- */
+        /* gather that user’s finished exams -------------------------------- */
         $exams = [];
         $seq   = 0;
         foreach ($uData['modules'] ?? [] as $m) {
             foreach ($m['requirements'] as $r) {
-                $g = isset($r['grade']) ? (float) $r['grade'] : null;
+                $g  = isset($r['grade']) ? (float) $r['grade'] : null;
                 $cr = (float) ($r['credits'] ?? 0);
                 if ($cr <= 0 || $g === null || empty($r['done'])) continue;
                 $exams[] = [
@@ -396,25 +398,33 @@ function buildSharedGradeDatasets(bool $showShared, ?array $userData): array
         }
         if (!$exams) continue;
 
-        /* sort by date, fallback input order */
         usort($exams, function ($a, $b) {
             if ($a['date'] !== null && $b['date'] !== null) return $a['date'] <=> $b['date'];
             if ($a['date'] === null && $b['date'] === null) return $a['seq'] <=> $b['seq'];
             return ($a['date'] === null) ? 1 : -1;
         });
 
-        /* cumulative average list */
+        /* cumulative averages + scaled x-coordinates ----------------------- */
         $runSum = $runCred = 0.0;
-        $avg    = [];
-        foreach ($exams as $e) {
+        $avgXY  = [];
+        $theirCount = count($exams);
+
+        foreach ($exams as $i => $e) {
             $runSum  += $e['grade'] * $e['credits'];
             $runCred += $e['credits'];
-            $avg[]    = round($runSum / $runCred, 3);
+
+            // scale: first point 0, last point ($originCount-1)
+            $x = ($theirCount > 1)
+               ? ($originCount - 1) * $i / ($theirCount - 1)
+               : 0;
+
+            $avgXY[] = [ 'x' => $x, 'y' => round($runSum / $runCred, 3) ];
         }
 
         $datasets[] = [
             'label'            => $uname,
-            'data'             => $avg,
+            'data'             => $avgXY,          // ← now [x,y] pairs
+            'parsing'          => false,           // tell Chart.js to use x/y keys
             'borderWidth'      => 1,
             'borderColor'      => 'rgba(128,128,128,0.65)',
             'backgroundColor'  => 'rgba(128,128,128,0.15)',

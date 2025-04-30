@@ -257,3 +257,88 @@ function sortRequirements(array &$requirements): void
         return $tsA <=> $tsB;   // earlier date first
     });
 }
+
+/**
+ * Build Chart.js datasets that plot the cumulative-earned credits
+ * of every user who shares data with the logged-in user.
+ *
+ * @param bool  $showShared   comes from the checkbox / GET param
+ * @param array $userData     master user table loaded in logic.php
+ * @return array              ready-to-json Chart.js dataset objects
+ */
+function buildSharedProgressDatasets(bool $showShared, ?array $userData): array
+{
+    $datasets = [];
+
+    if (!$showShared || !is_array($userData)) {
+        return $datasets;
+    }
+
+    $origin    = $_SESSION['username'] ?? '';
+    $usersDir  = __DIR__ . '/users/';          // …/app/users/
+
+    /* One common label range so all lines have identical length */
+    $labelRange = [1];
+
+    foreach ($userData as $uname => $uRec) {
+        if ($uname === $origin) {
+            continue;
+        }
+        $shares = $uRec['share_usernames'] ?? [];
+        if (!in_array('*', $shares, true) && !in_array($origin, $shares, true)) {
+            continue;
+        }
+
+        $file = $usersDir . $uRec['userid'] . '.json';
+        if (!is_readable($file)) {
+            continue;
+        }
+        $uData = json_decode(file_get_contents($file), true);
+        if (!is_array($uData)) {
+            continue;
+        }
+        $uMods = $uData['modules'] ?? [];
+
+        /* term-wise earned credits for that user */
+        $termEarned = [];
+        foreach ($uMods as $m) {
+            foreach ($m['requirements'] as $r) {
+                $cr = (float) ($r['credits'] ?? 0);
+                if ($cr <= 0 || empty($r['done'])) {
+                    continue;
+                }
+                $t = (int) $m['term'];
+                $termEarned[$t] = ($termEarned[$t] ?? 0) + $cr;
+            }
+        }
+        if (!$termEarned) {
+            continue;                       // no earned credits yet
+        }
+
+        /* widen the common label range if necessary */
+        $labelRange = range(1, max(end($labelRange), max(array_keys($termEarned))));
+
+        /* build cumulative array matching the common label length */
+        $cum = [];
+        $run = 0;
+        foreach ($labelRange as $t) {
+            $run += $termEarned[$t] ?? 0;
+            $cum[] = $run ?: null;          // keep gaps (null) for idle terms
+        }
+
+        $datasets[] = [
+            'label'            => $uname,
+            'data'             => $cum,
+            'borderWidth'      => 1,
+            'borderColor'      => 'rgba(128,128,128,0.65)',
+            'backgroundColor'  => 'rgba(128,128,128,0.15)',
+            'fill'             => false,
+            'tension'          => 0,
+            'pointRadius'      => 0,
+            'pointHoverRadius' => 0,
+            'spanGaps'         => false
+        ];
+    }
+
+    return $datasets;
+}

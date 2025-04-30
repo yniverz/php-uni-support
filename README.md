@@ -69,7 +69,7 @@ Users can `View All Requirements by Date` to see all their requirements sorted b
 A target term is a possible term where the user wants to have reached the target credits. Users can set multiple target terms, and the application will calculate the required credits per term to reach the target and show that below each term and in the chart.
 
 ### Interacting with other users
-Users have the option to set an `id` for each module and select Usernames to share information with at the top in edit mode (putting `*` as shared username will share with every user). The id will be shown to other users, and modules with the same id will show a handy note that the respective other user is also working on this module.
+Users have the option to set an `id` for each module and select Usernames to share information with at the top in edit mode (putting `*` as shared username will share with every user). The id will be shown to other users, and modules with the same id will show a handy note that the respective other user is also working on this module. Additionally when sharing, users will be able to see a progress line in the stats page where users can compare their progress with other users.
 
 ### iCal Integration
 - You can add the requirements with dates as events to your calendar using the iCal path `/calendar.ics?username=USERNAME&password=PASSWORD`.

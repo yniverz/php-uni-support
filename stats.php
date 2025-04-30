@@ -11,10 +11,20 @@ if (!$isLoggedIn) {
 
 require __DIR__ . '/app/logic.php';
 
+$modules = $data['modules'] ?? [];
+
+
+//---------------------------------------------------------
+// 0) Shared progress data
+//---------------------------------------------------------
+
+$showShared = isset($_GET['showShared']);
+$sharedProgressDatasets = buildSharedProgressDatasets($showShared, $userData);
+
+
 //---------------------------------------------------------
 // 1) Per‑term statistics (planned / earned / missing)
 //---------------------------------------------------------
-$modules = $data['modules'] ?? [];
 
 $termPlanned = $termEarned = [];
 foreach ($modules as $mod) {
@@ -128,12 +138,22 @@ foreach ($examEntries as $e) {
         </header>
 
         <div class="chart-wrapper"><canvas id="cumChart"></canvas></div>
+        <form id="toggleShared" method="get" style="display:inline;">
+            <label style="font-weight:normal;">
+                <input type="checkbox" name="showShared" value="1" <?php if ($showShared) echo 'checked'; ?>>
+                show shared progress
+            </label>
+        </form>
         <div class="chart-wrapper"><canvas id="termBarChart"></canvas></div>
         <?php if ($gradeProgress): ?>
             <div class="chart-wrapper"><canvas id="gradeChart"></canvas></div><?php endif; ?>
     </div>
 
     <script>
+        document.getElementById('toggleShared')
+                .elements['showShared']
+                .addEventListener('change', e => e.target.form.submit());
+
         const labels = <?php echo json_encode($labels); ?>;
         const cumEarned = <?php echo json_encode($cumEarned); ?>;
         const cumPlanned = <?php echo json_encode($cumPlanned); ?>;
@@ -142,6 +162,7 @@ foreach ($examEntries as $e) {
         const targetLines = <?php echo json_encode($targetLinesData); ?>;
         const gradeLabels = <?php echo json_encode($gradeLabels); ?>;
         const gradeProgress = <?php echo json_encode($gradeProgress); ?>;
+        const sharedLines = <?php echo json_encode($sharedProgressDatasets); ?>;
         const actualGrades = <?php echo json_encode($actualGrades); ?>;
 
         // -------- Chart 1: cumulative credits --------
@@ -179,6 +200,9 @@ foreach ($examEntries as $e) {
         }
 
         for (const t of targetLines) {
+            for (const s of sharedLines) {
+                datasetsCum.push(s);
+            }
             datasetsCum.push({
                 label: t.name,
                 data: t.data,

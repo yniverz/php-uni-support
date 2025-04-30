@@ -269,10 +269,43 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                         <?php
 
                         if (isset($mod['id']) && $mod['id'] !== '') {
-                            $similarUsers = getUsersWithModuleID($_SESSION['username'], $mod['id'], $mod['term'], $userData);
+                            // $similarUsers = getUsersWithModuleID($_SESSION['username'], $mod['id'], $mod['term'], $userData);
+                            // if (!empty($similarUsers)) {
+                            //     echo $mod['allDone'] ? "You joined: " : "You will join: ";
+                            //     echo htmlspecialchars(implode(', ', $similarUsers));
+                            // }
+
+                            $similarUsers = getUsersWithModuleTerms($_SESSION['username'], $mod['id'], $userData);
+                            // returns dict of username => list of integers which are terms
                             if (!empty($similarUsers)) {
-                                echo $mod['allDone'] ? "You joined: " : "You will join: ";
-                                echo htmlspecialchars(implode(', ', $similarUsers));
+                                // echo all who have this term in their list
+                                $thisTermPrefix = $mod['allDone'] ? "You joined: " : "You will join: ";
+                                $thisTerms = "";
+                                foreach ($similarUsers as $user => $terms) {
+                                    if (in_array($mod['term'], $terms)) {
+                                        $thisTerms .= htmlspecialchars($user) . ", ";
+                                    }
+                                }
+
+                                $thisTerms = rtrim($thisTerms, ", ");
+                                if ($thisTerms) {
+                                    echo $thisTermPrefix . $thisTerms;
+                                }
+
+                                $otherTermsPrefix = "Users in Other Terms: ";
+                                $otherTerms = "";
+                                foreach ($similarUsers as $user => $terms) {
+                                    if (in_array($mod['term'], $terms)) {
+                                        continue; // skip this user
+                                    }
+                                    $otherTerms .= htmlspecialchars($user) . " (Term: " . implode(", ", $terms) . "), ";
+                                }
+
+                                $otherTerms = rtrim($otherTerms, ", ");
+                                if ($otherTerms) {
+                                    echo "<br />" . $otherTermsPrefix . $otherTerms;
+                                }
+
                             }
                         }
 

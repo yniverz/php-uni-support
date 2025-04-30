@@ -85,29 +85,6 @@ function getTermCredits($modules, $termNumber)
     return $termTotal;
 }
 
-// function getUsersWithModuleID($originUsername, $moduleID, $term, $userData)
-// {
-//     // iterate through all users with origin username in their shared usernames list
-//     // load the respective data file
-//     // add user to list if has module with same id in same term
-//     $usersWithModule = [];
-//     foreach ($userData as $username => $user) {
-//         if ($username !== $originUsername && (in_array($originUsername, $user['share_usernames'] ?? []) || in_array("*", $user['share_usernames'] ?? []))) {
-//             $userJsonFile = __DIR__ . '/users/' . $user['userid'] . '.json';
-//             if (file_exists($userJsonFile)) {
-//                 $data = json_decode(file_get_contents($userJsonFile), true);
-//                 foreach ($data['modules'] as $module) {
-//                     if (isset($module['id']) && $module["id"] == $moduleID && $module['term'] == $term) {
-//                         $usersWithModule[] = $username;
-//                         break; // No need to check further for this user
-//                     }
-//                 }
-//             }
-//         }
-//     }
-
-//     return $usersWithModule;
-// }
 
 /**
  * Return all users that share data with $originUsername and have the

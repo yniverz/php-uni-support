@@ -349,3 +349,82 @@ function buildSharedProgressDatasets(bool $showShared, ?array $userData): array
 
     return $datasets;
 }
+
+/**
+ * Build grey-line datasets that show the cumulative grade average
+ * of every user who shares data with the logged-in user.
+ *
+ * @param bool  $showShared  state of the checkbox / GET param
+ * @param array $userData    master user table (loaded in logic.php)
+ * @return array             Chart.js-ready datasets
+ */
+function buildSharedGradeDatasets(bool $showShared, ?array $userData): array
+{
+    $datasets = [];
+    if (!$showShared || !is_array($userData)) {
+        return $datasets;
+    }
+
+    $origin   = $_SESSION['username'] ?? '';
+    $usersDir = __DIR__ . '/users/';
+
+    foreach ($userData as $uname => $uRec) {
+        if ($uname === $origin) continue;
+        $shares = $uRec['share_usernames'] ?? [];
+        if (!in_array('*', $shares, true) && !in_array($origin, $shares, true)) continue;
+
+        $file = $usersDir . $uRec['userid'] . '.json';
+        if (!is_readable($file)) continue;
+        $uData = json_decode(file_get_contents($file), true);
+        if (!is_array($uData)) continue;
+
+        /* --- harvest that user's finished exams --------------------- */
+        $exams = [];
+        $seq   = 0;
+        foreach ($uData['modules'] ?? [] as $m) {
+            foreach ($m['requirements'] as $r) {
+                $g = isset($r['grade']) ? (float) $r['grade'] : null;
+                $cr = (float) ($r['credits'] ?? 0);
+                if ($cr <= 0 || $g === null || empty($r['done'])) continue;
+                $exams[] = [
+                    'credits' => $cr,
+                    'grade'   => $g,
+                    'date'    => isset($r['date']) ? strtotime($r['date']) : null,
+                    'seq'     => $seq++,
+                ];
+            }
+        }
+        if (!$exams) continue;
+
+        /* sort by date, fallback input order */
+        usort($exams, function ($a, $b) {
+            if ($a['date'] !== null && $b['date'] !== null) return $a['date'] <=> $b['date'];
+            if ($a['date'] === null && $b['date'] === null) return $a['seq'] <=> $b['seq'];
+            return ($a['date'] === null) ? 1 : -1;
+        });
+
+        /* cumulative average list */
+        $runSum = $runCred = 0.0;
+        $avg    = [];
+        foreach ($exams as $e) {
+            $runSum  += $e['grade'] * $e['credits'];
+            $runCred += $e['credits'];
+            $avg[]    = round($runSum / $runCred, 3);
+        }
+
+        $datasets[] = [
+            'label'            => $uname,
+            'data'             => $avg,
+            'borderWidth'      => 1,
+            'borderColor'      => 'rgba(128,128,128,0.65)',
+            'backgroundColor'  => 'rgba(128,128,128,0.15)',
+            'fill'             => false,
+            'tension'          => 0,
+            'pointRadius'      => 0,
+            'pointHoverRadius' => 0,
+            'spanGaps'         => false
+        ];
+    }
+
+    return $datasets;
+}

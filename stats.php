@@ -20,6 +20,7 @@ $modules = $data['modules'] ?? [];
 
 $showShared = isset($_GET['showShared']);
 $sharedProgressDatasets = buildSharedProgressDatasets($showShared, $userData);
+$sharedGradeDatasets    = buildSharedGradeDatasets($showShared, $userData);
 
 
 //---------------------------------------------------------
@@ -138,15 +139,17 @@ foreach ($examEntries as $e) {
         </header>
 
         <div class="chart-wrapper"><canvas id="cumChart"></canvas></div>
+        <div class="chart-wrapper"><canvas id="termBarChart"></canvas></div>
+        <?php if ($gradeProgress): ?>
+            <div class="chart-wrapper"><canvas id="gradeChart"></canvas></div>
+        <?php endif; ?>
+
         <form id="toggleShared" method="get" style="display:inline;">
             <label style="font-weight:normal;">
                 <input type="checkbox" name="showShared" value="1" <?php if ($showShared) echo 'checked'; ?>>
                 show shared progress
             </label>
         </form>
-        <div class="chart-wrapper"><canvas id="termBarChart"></canvas></div>
-        <?php if ($gradeProgress): ?>
-            <div class="chart-wrapper"><canvas id="gradeChart"></canvas></div><?php endif; ?>
     </div>
 
     <script>
@@ -163,6 +166,7 @@ foreach ($examEntries as $e) {
         const gradeLabels = <?php echo json_encode($gradeLabels); ?>;
         const gradeProgress = <?php echo json_encode($gradeProgress); ?>;
         const sharedLines = <?php echo json_encode($sharedProgressDatasets); ?>;
+        const sharedGradeLines = <?php echo json_encode($sharedGradeDatasets); ?>;
         const actualGrades = <?php echo json_encode($actualGrades); ?>;
 
         // -------- Chart 1: cumulative credits --------
@@ -222,6 +226,7 @@ foreach ($examEntries as $e) {
                 datasets: datasetsCum
             },
             options: {
+                animation: false,
                 plugins: {
                     title: {
                         display: true,
@@ -256,6 +261,7 @@ foreach ($examEntries as $e) {
                 ]
             },
             options: {
+                animation: false,
                 plugins: {
                     title: {
                         display: true,
@@ -272,40 +278,45 @@ foreach ($examEntries as $e) {
 
         // -------- Chart 3: grade average + individual grades --------
         if (gradeProgress.length) {
+            const gradeDatasets = [
+                {
+                    label: 'Average (cumulative)',
+                    data: gradeProgress,
+                    borderColor: 'rgba(231,76,60,1)',
+                    backgroundColor: 'rgba(231,76,60,0.25)',
+                    tension: 0,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2
+                },
+                {
+                    label: 'Exam grade',
+                    data: actualGrades,
+                    showLine: false,
+                    borderColor: 'rgba(52,152,219,0.9)',
+                    backgroundColor: 'rgba(52,152,219,0.9)',
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    type: 'line',
+                    trendlineLinear: {
+                        colorMin: 'rgba(52,152,219,0.25)',
+                        colorMax: 'rgba(52,152,219,0.25)',
+                        lineStyle: 'dashed',
+                        width: 2
+                    }
+                }
+            ];
+
+            // NEW: add each shared user's grey average line
+            for (const s of sharedGradeLines) {
+                gradeDatasets.push(s);
+            }
+
             new Chart(document.getElementById('gradeChart'), {
                 type: 'line',
-                data: {
-                    labels: gradeLabels,
-                    datasets: [
-                        {
-                            label: 'Average (cumulative)',
-                            data: gradeProgress,
-                            borderColor: 'rgba(231,76,60,1)',
-                            backgroundColor: 'rgba(231,76,60,0.25)',
-                            tension: 0,
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'Exam grade',
-                            data: actualGrades,
-                            showLine: false,
-                            borderColor: 'rgba(52,152,219,0.9)',
-                            backgroundColor: 'rgba(52,152,219,0.9)',
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            type: 'line', // keeps categorical x‑axis mapping without extra {x,y}
-                            trendlineLinear: {
-                                colorMin: 'rgba(52,152,219,0.25)',  // start colour
-                                colorMax: 'rgba(52,152,219,0.25)',  // end colour (same = solid line)
-                                lineStyle: 'dashed',                // solid | dotted | dashed | dashdot
-                                width: 2
-                            }
-                        }
-                    ]
-                },
+                data: { labels: gradeLabels, datasets: gradeDatasets },
                 options: {
+                    animation: false,
                     plugins: {
                         title: { display: true, text: 'Grade Average Progression' },
                         legend: { position: 'bottom' },

@@ -161,12 +161,99 @@ function updateModuleCompletionStatus(&$module)
     $module['allDone'] = $allDone;
 }
 
-function sortModules(&$modules)
+// function sortModules(&$modules)
+// {
+//     usort($modules, function ($a, $b) {
+//         if ($a['term'] == $b['term']) {
+//             return $a['idealTerm'] <=> $b['idealTerm'];
+//         }
+//         return $a['term'] <=> $b['term'];
+//     });
+// }
+
+/**
+ * Sort a modules[] array in-place by:
+ *   1. earliest requirement date   (oldest first)
+ *      • modules with no dated requirements come after those with dates
+ *   2. idealTerm                   (ascending) – only if both lack dates
+ *   3. term                        (ascending) – only if both lack dates
+ *
+ * @param array &$modules
+ */
+function sortModules(array &$modules): void
 {
     usort($modules, function ($a, $b) {
-        if ($a['term'] == $b['term']) {
+        $earliestA = getEarliestDate($a['requirements'] ?? []);
+        $earliestB = getEarliestDate($b['requirements'] ?? []);
+
+        /* -------- 1) primary key: earliest date -------- */
+        if ($earliestA !== null || $earliestB !== null) {
+            // Put modules *with* a date before those without
+            if ($earliestA === null) {
+                return 1;          // $a has no date → after $b
+            }
+            if ($earliestB === null) {
+                return -1;         // $b has no date → after $a
+            }
+            return $earliestA <=> $earliestB;   // both dated → chronological
+        }
+
+        /* -------- 2) fallback: idealTerm, then term -------- */
+        if ($a['idealTerm'] !== $b['idealTerm']) {
             return $a['idealTerm'] <=> $b['idealTerm'];
         }
         return $a['term'] <=> $b['term'];
+    });
+}
+
+/**
+ * Return the earliest YYYY-MM-DD date in a requirements array,
+ * or null if none of the requirements have a valid date.
+ *
+ * @param array $requirements
+ * @return int|null  Unix timestamp of the earliest date or null
+ */
+function getEarliestDate(array $requirements): ?int
+{
+    $earliest = null;
+    foreach ($requirements as $req) {
+        if (!empty($req['date'])) {
+            $ts = strtotime($req['date']);
+            if ($ts !== false && ($earliest === null || $ts < $earliest)) {
+                $earliest = $ts;
+            }
+        }
+    }
+    return $earliest;
+}
+
+
+/**
+ * Sort a requirements array in-place by ascending date.
+ * Entries that lack a valid `date` field are moved to the end.
+ *
+ * @param array &$requirements  requirements[] array from a module
+ */
+function sortRequirements(array &$requirements): void
+{
+    usort($requirements, function ($a, $b) {
+        $tsA = !empty($a['date']) ? strtotime($a['date']) : null;
+        $tsB = !empty($b['date']) ? strtotime($b['date']) : null;
+
+        // If both are missing dates, keep original relative order (return 0)
+        if ($tsA === null && $tsB === null) {
+            return 0;
+        }
+
+        // If only one is missing, the dated one comes first
+        if ($tsA === null) {
+            return 1;      // $a goes after $b
+        }
+        if ($tsB === null) {
+            return -1;     // $a goes before $b
+        }
+
+        // Both have dates → chronological comparison
+        return $tsA <=> $tsB;   // earlier date first
     });
 }

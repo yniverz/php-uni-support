@@ -142,18 +142,6 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                     <button type="submit" name="update_semester_targets">Update</button>
                 </form>
                 <hr />
-            <?php else: ?>
-                <!-- VIEW MODE: Just display the settings -->
-                <h2>Overall Degree Settings</h2>
-                <p class="info-line">
-                    <strong>Total Needed Credits:</strong>
-                    <?php echo htmlspecialchars($data['totalNeededCredits']); ?>
-                </p>
-                <p class="info-line">
-                    <strong>Target Terms:</strong>
-                    <?php echo htmlspecialchars(implode(', ', $data['semesterTargets'])); ?>
-                </p>
-                <hr />
             <?php endif; ?>
 
             <p class="info-line">
@@ -452,18 +440,20 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                     $haveCreditsSoFar = getCompletedCreditsUpToTerm($data['modules'], $termNumber);
                     $wantCreditsSoFar = getAllCreditsUpToTerm($data['modules'], $termNumber);
 
+                    $metTargetColor = "rgb(142, 205, 142)"; // default color
+
                     echo "<div class='credit-summary'>";
                     echo "<p><strong>Credits after Term $termNumber:</strong></p>";
                     echo "<table style='border-collapse: collapse;'>";
                     echo "<tr><td style='padding: 4px 10px;'>Have:</td><td style='padding: 4px 10px;'>$haveCreditsSoFar</td></tr>";
-                    echo "<tr" . ($haveCreditsSoFar >= $wantCreditsSoFar ? " style='color: grey;'" : "") . "><td style='padding: 4px 10px;'>Want:</td><td style='padding: 4px 10px;'>$wantCreditsSoFar</td></tr>";
+                    echo "<tr" . ($haveCreditsSoFar >= $wantCreditsSoFar ? " style='color: " . $metTargetColor . ";'" : "") . "><td style='padding: 4px 10px;'>Want:</td><td style='padding: 4px 10px;'>$wantCreditsSoFar</td></tr>";
 
                     foreach ($targets as $target) {
                         $ideal = (int) floor(($termNumber / $target) * $neededCredits);
                         if ($ideal > $neededCredits) {
                             $ideal = $neededCredits;
                         }
-                        echo "<tr" . ($haveCreditsSoFar >= $ideal ? " style='color: grey;'" : "") . "><td style='padding: 4px 10px;'>Target $target:</td><td style='padding: 4px 10px;'>$ideal</td></tr>";
+                        echo "<tr" . ($haveCreditsSoFar >= $ideal ? " style='color: " . $metTargetColor . ";'" : "") . "><td style='padding: 4px 10px;'>Target $target:</td><td style='padding: 4px 10px;'>$ideal</td></tr>";
                     }
 
                     echo "</table>";
@@ -474,7 +464,11 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
             } else {
                 echo "<p>No modules yet.</p>";
             }
+
+
+            include __DIR__ . '/app/colorControls.php';
             ?>
+
         </div> <!-- end container -->
 
         <footer>

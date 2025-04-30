@@ -3,24 +3,36 @@
 /* Basic resets / container styles. 
    This file is referenced by both index.php and login.php. */
 
+:root {
+    --bg1: #f4f4f4;
+    --bg2: #f4f4f4;
+    --module: #fafafa;
+    --moduleDone: #f0f0f0;
+    --moduleHighlight: #e0f7fa;
+    --text1: #333;
+    --text2: #444;
+    --a1: #007BFF;
+    --a2: #e74c3c;
+  }
+
 body {
     margin: 0;
     padding: 0;
-    background: #f4f4f4;
+    background: var(--bg1);
     font-family: Arial, sans-serif;
-    color: #333;
+    color: var(--text1);
 }
 
 footer {
     text-align: center;
     padding: 20px 0;
-    background: #fff;
+    background: var(--bg1);
     border-top: 1px solid #ccc;
     position: relative;
 }
 
 footer a {
-    color: #007BFF;
+    color: var(--a1);
     text-decoration: none;
 }
 
@@ -31,7 +43,7 @@ footer a:hover {
 .container {
     max-width: 900px;
     margin: 40px auto;
-    background: #fff;
+    background: var(--bg2);
     padding: 25px 30px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 6px;
@@ -40,7 +52,7 @@ footer a:hover {
 .login-container {
     max-width: 300px;
     margin: 100px auto;
-    background: #fff;
+    background: var(--bg2);
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
@@ -59,7 +71,7 @@ hr {
 h1,
 h2 {
     margin-top: 0;
-    color: #444;
+    color: var(--text1);
 }
 
 .error {
@@ -85,7 +97,7 @@ input[type="date"] {
 }
 
 button {
-    background: #007BFF;
+    background: var(--a1);
     color: #fff;
     border: none;
     padding: 7px 10px;
@@ -101,7 +113,7 @@ button:hover {
 /* Index page extras */
 .top-links a {
     text-decoration: none;
-    color: #007BFF;
+    color: var(--a1);
     margin-left: 15px;
 }
 
@@ -112,20 +124,21 @@ button:hover {
 .module-card {
     border: 1px solid #ccc;
     border-radius: 5px;
+    color: var(--text2);
     padding: 15px;
     margin: 10px 0;
-    background: #fafafa;
+    background: var(--module);
 }
 
 .module-card.completed {
     color: #999;
-    background: #f0f0f0;
+    background: var(--moduleDone);
     border-color: #ddd;
 }
 
 .module-card.highlighted {
-    background: #e0f7fa;
-    border-color: #007BFF;
+    background: var(--moduleHighlight);
+    border-color: var(--a1);
 }
 
 .req-list {

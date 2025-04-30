@@ -388,6 +388,8 @@ $sharedGradeDatasets    = buildSharedGradeDatasets($showShared, $userData, $myEx
             })
         }
     </script>
+
+<?php include __DIR__ . '/app/colorControls.php'; ?>
 </body>
 
 </html>

@@ -262,6 +262,8 @@ function getTimeBetween($startDateStr, $endDateStr)
         <?php endif; ?>
     </div>
 
+    <?php include __DIR__ . '/app/colorControls.php'; ?>
+
 </body>
 
 </html>

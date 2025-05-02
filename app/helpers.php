@@ -160,109 +160,132 @@ function updateModuleCompletionStatus(&$module)
     }
     $module['allDone'] = $allDone;
 }
-
-// function sortModules(&$modules)
-// {
-//     usort($modules, function ($a, $b) {
-//         if ($a['term'] == $b['term']) {
-//             return $a['idealTerm'] <=> $b['idealTerm'];
-//         }
-//         return $a['term'] <=> $b['term'];
-//     });
-// }
-
 /**
- * Sort a modules[] array in-place by:
- *   1. earliest requirement date   (oldest first)
- *      • modules with no dated requirements come after those with dates
- *   2. idealTerm                   (ascending) – only if both lack dates
- *   3. term                        (ascending) – only if both lack dates
- *
- * @param array &$modules
+ * Sort modules in‑place by
+ *   0.  modules with OPEN requirements first;
+ *       – order those by earliest‑dated OPEN requirement (oldest → newest)
+ *       – open requirements without a date come after dated ones
+ *   1.  modules where **all** requirements are DONE
+ *       – order those by earliest‑dated DONE requirement (oldest → newest)
+ *       – if none of the done reqs have dates, they’re grouped at the end
+ *   2.  idealTerm   (ascending, as final fallback)
+ *   3.  term        (ascending, as final fallback)
  */
 function sortModules(array &$modules): void
 {
-    // sort requirements first
+    /* keep requirement date & open‑first ordering inside each module */
     foreach ($modules as &$module) {
         sortRequirements($module['requirements']);
     }
-    unset($module);   // break reference to last element
-    
-    // sort modules by earliest requirement date
+    unset($module);
+
     usort($modules, function ($a, $b) {
-        $earliestA = getEarliestDate($a['requirements'] ?? []);
-        $earliestB = getEarliestDate($b['requirements'] ?? []);
 
-        /* -------- 1) primary key: earliest date -------- */
-        if ($earliestA !== null || $earliestB !== null) {
-            // Put modules *with* a date before those without
-            if ($earliestA === null) {
-                return 1;          // $a has no date → after $b
-            }
-            if ($earliestB === null) {
-                return -1;         // $b has no date → after $a
-            }
-            return $earliestA <=> $earliestB;   // both dated → chronological
+        $openA = hasOpenReq($a['requirements'] ?? []);
+        $openB = hasOpenReq($b['requirements'] ?? []);
+
+        /* -------- 0) open vs done -------- */
+        if ($openA !== $openB) {
+            return $openA ? -1 : 1;          // open first
         }
 
-        /* -------- 2) fallback: idealTerm, then term -------- */
-        if ($a['idealTerm'] !== $b['idealTerm']) {
-            return $a['idealTerm'] <=> $b['idealTerm'];
+        /* -------- 1) both OPEN: compare earliest open dates -------- */
+        if ($openA && $openB) {
+            $eoA = getEarliestOpenDate($a['requirements']);
+            $eoB = getEarliestOpenDate($b['requirements']);
+
+            if ($eoA !== null || $eoB !== null) {
+                if ($eoA === null) return 1;   // undated after dated
+                if ($eoB === null) return -1;
+                return $eoA <=> $eoB;
+            }
+            /* fall through if neither open req has a date */
         }
-        return $a['term'] <=> $b['term'];
+
+        /* -------- 1) both DONE: compare earliest DONE dates -------- */
+        if (!$openA && !$openB) {
+            $edA = getEarliestDoneDate($a['requirements']);
+            $edB = getEarliestDoneDate($b['requirements']);
+
+            if ($edA !== null || $edB !== null) {
+                if ($edA === null) return 1;
+                if ($edB === null) return -1;
+                return $edA <=> $edB;
+            }
+            /* fall through if no done reqs have dates */
+        }
+
+        /* -------- 2‑3) final fallback -------- */
+        return ($a['idealTerm'] ?? 0) <=> ($b['idealTerm'] ?? 0)
+            ?:  ($a['term']      ?? 0) <=> ($b['term']      ?? 0);
     });
 }
 
 /**
- * Return the earliest YYYY-MM-DD date in a requirements array,
- * or null if none of the requirements have a valid date.
- *
- * @param array $requirements
- * @return int|null  Unix timestamp of the earliest date or null
+ * Sort requirements[] in‑place by
+ *   0.  *open first*      (done = false/empty)
+ *   1.  date (ascending)  – within each group
+ *   2.  undated items come last inside their group
  */
-function getEarliestDate(array $requirements): ?int
+function sortRequirements(array &$requirements): void
+{
+    usort($requirements, function ($a, $b) {
+
+        /* 0) open before done */
+        $doneA = !empty($a['done']);
+        $doneB = !empty($b['done']);
+        if ($doneA !== $doneB) {
+            return $doneA ? 1 : -1;      // open (false) first
+        }
+
+        /* 1‑2) date ordering exactly as before */
+        $tsA = !empty($a['date']) ? strtotime($a['date']) : null;
+        $tsB = !empty($b['date']) ? strtotime($b['date']) : null;
+        if ($tsA === null && $tsB === null) return 0;
+        if ($tsA === null) return 1;
+        if ($tsB === null) return -1;
+        return $tsA <=> $tsB;
+    });
+}
+
+/* ---------- helpers ------------------------------------------------- */
+
+/** true if at least one requirement is still open */
+function hasOpenReq(array $requirements): bool
+{
+    foreach ($requirements as $r) {
+        if (empty($r['done'])) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/** earliest date among OPEN requirements, or null */
+function getEarliestOpenDate(array $reqs): ?int
+{
+    return getEarliestDateByDone($reqs, false);
+}
+
+/** earliest date among DONE requirements, or null */
+function getEarliestDoneDate(array $reqs): ?int
+{
+    return getEarliestDateByDone($reqs, true);
+}
+
+/** shared worker: earliest YYYY‑MM‑DD where 'done' == $doneFlag */
+function getEarliestDateByDone(array $reqs, bool $doneFlag): ?int
 {
     $earliest = null;
-    foreach ($requirements as $req) {
-        if (!empty($req['date'])) {
-            $ts = strtotime($req['date']);
+    foreach ($reqs as $r) {
+        if (!empty($r['date']) && (!empty($r['done']) === $doneFlag)) {
+            $ts = strtotime($r['date']);
             if ($ts !== false && ($earliest === null || $ts < $earliest)) {
                 $earliest = $ts;
             }
         }
     }
     return $earliest;
-}
-
-
-/**
- * Sort a requirements array in-place by ascending date.
- * Entries that lack a valid `date` field are moved to the end.
- *
- * @param array &$requirements  requirements[] array from a module
- */
-function sortRequirements(array &$requirements): void
-{
-    usort($requirements, function ($a, $b) {
-        $tsA = !empty($a['date']) ? strtotime($a['date']) : null;
-        $tsB = !empty($b['date']) ? strtotime($b['date']) : null;
-
-        // If both are missing dates, keep original relative order (return 0)
-        if ($tsA === null && $tsB === null) {
-            return 0;
-        }
-
-        // If only one is missing, the dated one comes first
-        if ($tsA === null) {
-            return 1;      // $a goes after $b
-        }
-        if ($tsB === null) {
-            return -1;     // $a goes before $b
-        }
-
-        // Both have dates → chronological comparison
-        return $tsA <=> $tsB;   // earlier date first
-    });
 }
 
 /**

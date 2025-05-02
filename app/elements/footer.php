@@ -21,5 +21,4 @@
             form.submit();
         }
     });
-
 </script>

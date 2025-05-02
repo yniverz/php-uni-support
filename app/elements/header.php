@@ -14,91 +14,100 @@
       <br>
       <br>
 
-      <div id="themeControls">
-        <strong style="font-size:13px;display:block;margin-bottom:.25rem">
+      <div id="themeCustomiser">
+        <strong style="font-size: 13px; display: block; margin-bottom: 0.25rem">
           Theme&nbsp;customiser:
         </strong>
 
-        <div id="themeControls" style="margin-bottom:.5rem"></div>
+        <table id="themeTable"></table>
 
-        <button id="resetTheme" style="margin-top:.5rem;padding:.25rem .6rem">
-          reset
-        </button>
+        <button id="resetTheme">reset</button>
       </div>
+
+
       <script>
         (() => {
           /* ---- keys for localStorage + their fallback defaults ------------- */
-          const defaults = {
-            bg1: '#f4f4f4',
-            bg2: '#f4f4f4',
-            module: '#f4f4f4',
-            moduleDone: '#f4f4f4',
-            moduleHighlight: '#e0f7fa',
-            text1: '#333',
-            text2: '#444',
-            a1: '#007BFF',
-            a2: '#e74c3c'
-          };
-          const keys = Object.keys(defaults);
+          // const defaults = {
+          //   bg1: "#f4f4f4",
+          //   bg2: "#f4f4f4",
+          //   module: "#f4f4f4",
+          //   moduleDone: "#f4f4f4",
+          //   moduleHighlight: "#e0f7fa",
+          //   text1: "#333",
+          //   text2: "#444",
+          //   a1: "#007BFF",
+          //   a2: "#e74c3c",
+          // };
+
+          // get variable names from css root dynamically (all starting with --)
+          const root = getComputedStyle(document.documentElement);
+          const defaults = {};
+          for (const key of root) {
+            if (key.startsWith("--")) {
+              const value = root.getPropertyValue(key);
+              defaults[key.substring(2)] = value.trim();
+            }
+          }
+          console.log(defaults);
+
+          // sort keys alphabetically
+          const keys = Object.keys(defaults).sort((a, b) => a.localeCompare(b));
 
           /* ---- elements ---------------------------------------------------- */
-          const els = {
-            reset: document.getElementById('resetTheme'),
-            themeControls: document.getElementById('themeControls')
+          const table = document.getElementById("themeTable");
+          const resetBtn = document.getElementById("resetTheme");
+
+          /* ---- helpers ----------------------------------------------------- */
+          function makeRow(key, value) {
+            const tr = document.createElement("tr");
+
+            const tdPicker = document.createElement("td");
+            const picker = document.createElement("input");
+            picker.type = "color";
+            picker.id = key;
+            picker.value = value;
+            picker.style.width = "100%"; // makes alignment snappy
+            picker.addEventListener("input", applyTheme);
+            tdPicker.appendChild(picker);
+
+            const tdLabel = document.createElement("td");
+            tdLabel.textContent = key.replace(/([a-z])([A-Z])/g, "$1 $2");
+
+            tr.appendChild(tdPicker);
+            tr.appendChild(tdLabel);
+            return tr;
           }
 
-          keys.forEach(k => {
-            const el = document.createElement('input');
-            el.type = 'color';
-            el.value = defaults[k];
-            el.id = k;
-            el.style.verticalAlign = 'middle';
-            el.style.marginLeft = '.5em';
-            // when color changed, update css
-            el.addEventListener('input', () => {
-              const root = document.documentElement.style;
-              root.setProperty('--' + k, el.value); // e.g.  --bg , --a1 , --a2
-              localStorage.setItem('theme_' + k, el.value);
+          function applyTheme() {
+            const root = document.documentElement.style;
+            keys.forEach((k) => {
+              const input = document.getElementById(k);
+              if (input) {
+                root.setProperty("--" + k, input.value);
+                localStorage.setItem("theme_" + k, input.value);
+              }
             });
-            els[k] = el;
+          }
 
-            const label = document.createElement('label');
-            label.appendChild(el);
-            label.appendChild(document.createTextNode(k.replace(/([a-z])([A-Z])/g, '$1 $2')));
-            document.getElementById('themeControls').appendChild(document.createElement('br'));
-            document.getElementById('themeControls').appendChild(label);
-          });
-
-          /* ---- read from storage OR use defaults, then apply --------------- */
           function loadTheme() {
-            keys.forEach(k => {
-              const val = localStorage.getItem('theme_' + k) || defaults[k];
-              els[k].value = val;
+            table.innerHTML = "";
+            keys.forEach((k) => {
+              const saved = localStorage.getItem("theme_" + k) || defaults[k];
+              table.appendChild(makeRow(k, saved));
             });
             applyTheme();
           }
 
-          /* ---- write current pickers to storage, set CSS custom props ------ */
-          function applyTheme() {
-            const root = document.documentElement.style;
-            keys.forEach(k => {
-              const val = els[k].value;
-              root.setProperty('--' + k, val);          // e.g.  --bg , --a1 , --a2
-              localStorage.setItem('theme_' + k, val);
-            });
-          }
-
-          /* ---- reset to factory ------------------------------------------- */
           function resetTheme() {
-            keys.forEach(k => localStorage.removeItem('theme_' + k));
+            keys.forEach((k) => localStorage.removeItem("theme_" + k));
             loadTheme();
           }
 
-          /* ---- wire events ------------------------------------------------- */
-          keys.forEach(k => els[k].addEventListener('input', applyTheme));
-          els.reset.addEventListener('click', resetTheme);
+          /* ---- wire up events --------------------------------------------- */
+          resetBtn.addEventListener("click", resetTheme);
 
-          /* ---- initialise on first load ----------------------------------- */
+          /* ---- first run --------------------------------------------------- */
           loadTheme();
         })();
       </script>
@@ -113,8 +122,8 @@
 </div>
 
 <div class="top-links">
-  <?php 
-    $pageName = basename($_SERVER['PHP_SELF']);
+  <?php
+  $pageName = basename($_SERVER['PHP_SELF']);
   ?>
 
   <?php if ($_SESSION['userid'] === '0'): ?>
@@ -122,9 +131,9 @@
   <?php endif; ?>
   <?php if ($pageName == "index.php" && $isEditMode): ?>
     <a href="index.php">Switch to View Mode</a>
-  <?php elseif($pageName == "index.php"): ?>
+  <?php elseif ($pageName == "index.php"): ?>
     <a href="index.php?mode=edit">Switch to Edit Mode</a>
-  <?php else: // deactivated grey link?>
+  <?php else: // deactivated grey link ?>
     <a class="disabled">Switch to Edit Mode</a>
   <?php endif; ?>
   <a href="index.php" class="<?php echo $pageName == 'index.php' ? 'active' : ''; ?>">Home</a>

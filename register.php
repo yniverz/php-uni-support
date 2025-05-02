@@ -56,17 +56,6 @@ if (isset($_POST['register_submit'])) {
             'password' => $hashedPassword
         ];
 
-        // 6) Save userData back to your config or user storage.
-        // e.g., if you're storing in $data['users'] or a separate JSON file,
-        // do so here. For example:
-        //   $data['users'] = $userData;
-        //   file_put_contents(...), etc.
-
-        // If you're just storing $userData in config.php, you might do something like:
-        // saveUserData($userData);
-        // (Implement this function in helpers.php or wherever you handle user data)
-
-        // For now, let's assume we have a quick function in config or helpers:
         saveData($userData, $userDataFile);
 
         // 7) Indicate success

@@ -4,35 +4,34 @@
    This file is referenced by both index.php and login.php. */
 
 :root {
-    --bg1: #f4f4f4;
-    --bg2: #f4f4f4;
+    --bg-primary: #f4f4f4;
+    --bg-secondary: #f4f4f4;
     --module: #fafafa;
-    --moduleDone: #f0f0f0;
-    --moduleHighlight: #e0f7fa;
-    --text1: #333;
-    --text2: #444;
-    --a1: #007BFF;
-    --a2: #e74c3c;
+    --module-done: #f0f0f0;
+    --module-highlight: #e0f7fa;
+    --text-primary: #333;
+    --text-secondary: #444;
+    --link: #007BFF;
   }
 
 body {
     margin: 0;
     padding: 0;
-    background: var(--bg1);
+    background: var(--bg-primary);
     font-family: Arial, sans-serif;
-    color: var(--text1);
+    color: var(--text-primary);
 }
 
 footer {
     text-align: center;
     padding: 20px 0;
-    background: var(--bg1);
+    background: var(--bg-primary);
     border-top: 1px solid #ccc;
     position: relative;
 }
 
 footer a {
-    color: var(--a1);
+    color: var(--link);
     text-decoration: none;
 }
 
@@ -43,7 +42,7 @@ footer a:hover {
 .container {
     max-width: 900px;
     margin: 40px auto;
-    background: var(--bg2);
+    background: var(--bg-secondary);
     padding: 25px 30px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 6px;
@@ -52,7 +51,7 @@ footer a:hover {
 .login-container {
     max-width: 300px;
     margin: 100px auto;
-    background: var(--bg2);
+    background: var(--bg-secondary);
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
@@ -71,7 +70,7 @@ hr {
 h1,
 h2 {
     margin-top: 0;
-    color: var(--text1);
+    color: var(--text-primary);
 }
 
 .error {
@@ -97,7 +96,7 @@ input[type="date"] {
 }
 
 button {
-    background: var(--a1);
+    background: var(--link);
     color: #fff;
     border: none;
     padding: 7px 10px;
@@ -113,7 +112,7 @@ button:hover {
 /* Index page extras */
 .top-links a {
     text-decoration: none;
-    color: var(--a1);
+    color: var(--link);
     margin-left: 15px;
 }
 
@@ -123,7 +122,7 @@ button:hover {
 
 .top-links a.active {
     font-weight: bold;
-    color: var(--text1);
+    color: var(--text-primary);
     /* other active styles */
 }
 
@@ -135,7 +134,7 @@ button:hover {
 .module-card {
     border: 1px solid #ccc;
     border-radius: 5px;
-    color: var(--text2);
+    color: var(--text-secondary);
     padding: 15px;
     margin: 10px 0;
     background: var(--module);
@@ -143,13 +142,13 @@ button:hover {
 
 .module-card.completed {
     color: #999;
-    background: var(--moduleDone);
+    background: var(--module-done);
     border-color: #ddd;
 }
 
 .module-card.highlighted {
-    background: var(--moduleHighlight);
-    border-color: var(--a1);
+    background: var(--module-highlight);
+    border-color: var(--link);
 }
 
 .req-list {
@@ -214,7 +213,7 @@ canvas {
     display: inline-block;
     padding: 10px 20px;
     /* background-color: #3498db; */
-    color: var(--text1);
+    color: var(--text-primary);
     font-weight: bold;
     cursor: pointer;
     border-radius: 4px;
@@ -237,7 +236,7 @@ canvas {
 
 /* The modal content */
 .modal-content {
-    background: var(--bg2);
+    background: var(--bg-secondary);
     padding: 20px;
     border-radius: 8px;
     width: 300px;
@@ -260,3 +259,40 @@ canvas {
     border-radius: 4px;
     cursor: pointer;
 }
+
+
+
+/* Custom color picker */
+
+
+#themeCustomiser {
+    font-family: system-ui, sans-serif;
+  }
+
+  #themeTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  #themeTable td {
+    padding: 0.25rem 0.5rem;
+    vertical-align: middle;
+  }
+
+  /* colour picker (left) */
+  #themeTable td:first-child {
+    width: 50%;
+    text-align: right; /* flush picker up against middle */
+  }
+
+  /* label text (right) */
+  #themeTable td:last-child {
+    width: 50%;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  #resetTheme {
+    margin-top: 0.5rem;
+    padding: 0.25rem 0.6rem;
+  }

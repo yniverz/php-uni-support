@@ -185,10 +185,9 @@ function getTimeBetween($startDateStr, $endDateStr)
 
     <div class="container">
         <header>
-            <h1>All Requirements by Date</h1>
-            <div class="top-links">
-                <a href="index.php">Back to Modules</a>
-            </div>
+            <header>
+                <?php include __DIR__ . '/app/elements/header.php'; ?>
+            </header>
         </header>
 
         <?php if (empty($allRequirements)): ?>
@@ -262,7 +261,10 @@ function getTimeBetween($startDateStr, $endDateStr)
         <?php endif; ?>
     </div>
 
-    <?php include __DIR__ . '/app/colorControls.php'; ?>
+
+    <footer>
+        <?php include __DIR__ . '/app/elements/footer.php'; ?>
+    </footer>
 
 </body>
 

@@ -121,6 +121,17 @@ button:hover {
     text-decoration: underline;
 }
 
+.top-links a.active {
+    font-weight: bold;
+    color: var(--text1);
+    /* other active styles */
+}
+
+.top-links a.disabled {
+    color: #999;
+    pointer-events: none;
+}
+
 .module-card {
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -180,4 +191,72 @@ canvas {
 
 .chart-wrapper {
     margin: 40px 0;
+}
+
+
+/* Index page menu modal */
+
+
+.header-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+/* Hidden checkbox */
+#menu-toggle {
+    display: none;
+}
+
+/* The menu button */
+.menu-button {
+    display: inline-block;
+    padding: 10px 20px;
+    /* background-color: #3498db; */
+    color: var(--text1);
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* The modal background */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* The modal content */
+.modal-content {
+    background: var(--bg2);
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Show modal when checkbox is checked */
+#menu-toggle:checked+.menu-button+.modal-overlay {
+    display: flex;
+}
+
+/* Close button inside modal */
+.close-button {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 8px 12px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
 }

@@ -113,9 +113,9 @@ foreach ($examEntries as $e) {
 //---------------------------------------------------------
 
 $showShared = isset($_GET['showShared']);
-$myExamCount           = count($gradeProgress);
+$myExamCount = count($gradeProgress);
 $sharedProgressDatasets = buildSharedProgressDatasets($showShared, $userData);
-$sharedGradeDatasets    = buildSharedGradeDatasets($showShared, $userData, $myExamCount);
+$sharedGradeDatasets = buildSharedGradeDatasets($showShared, $userData, $myExamCount);
 
 
 //---------------------------------------------------------
@@ -134,9 +134,9 @@ $sharedGradeDatasets    = buildSharedGradeDatasets($showShared, $userData, $myEx
 
 <body>
     <div class="container">
+
         <header>
-            <h1>Statistics Dashboard (<?php echo htmlspecialchars($_SESSION['username']); ?>)</h1>
-            <div class="top-links"><a href="index.php">Back to Overview</a></div>
+            <?php include __DIR__ . '/app/elements/header.php'; ?>
         </header>
 
         <div class="chart-wrapper"><canvas id="cumChart"></canvas></div>
@@ -147,7 +147,8 @@ $sharedGradeDatasets    = buildSharedGradeDatasets($showShared, $userData, $myEx
 
         <form id="toggleShared" method="get" style="display:inline;">
             <label style="font-weight:normal;">
-                <input type="checkbox" name="showShared" value="1" <?php if ($showShared) echo 'checked'; ?>>
+                <input type="checkbox" name="showShared" value="1" <?php if ($showShared)
+                    echo 'checked'; ?>>
                 show shared progress
             </label>
         </form>
@@ -159,11 +160,11 @@ $sharedGradeDatasets    = buildSharedGradeDatasets($showShared, $userData, $myEx
             id: 'lineLabel',
 
             afterDatasetsDraw(chart, args, opts) {
-                const { ctx }   = chart;
-                const  cfg      = opts || {};
-                const  font     = cfg.font || '10px sans-serif';
-                const  Xoffset   = cfg.Xoffset ?? -2;
-                const  Yoffset    = cfg.Yoffset ?? -5;
+                const { ctx } = chart;
+                const cfg = opts || {};
+                const font = cfg.font || '10px sans-serif';
+                const Xoffset = cfg.Xoffset ?? -2;
+                const Yoffset = cfg.Yoffset ?? -5;
 
                 chart.data.datasets.forEach((ds, idx) => {
                     if (!chart.isDatasetVisible(idx)) return;
@@ -193,8 +194,8 @@ $sharedGradeDatasets    = buildSharedGradeDatasets($showShared, $userData, $myEx
 
     <script>
         document.getElementById('toggleShared')
-                .elements['showShared']
-                .addEventListener('change', e => e.target.form.submit());
+            .elements['showShared']
+            .addEventListener('change', e => e.target.form.submit());
 
         const labels = <?php echo json_encode($labels); ?>;
         const cumEarned = <?php echo json_encode($cumEarned); ?>;
@@ -319,8 +320,8 @@ $sharedGradeDatasets    = buildSharedGradeDatasets($showShared, $userData, $myEx
         // -------- Chart 3: grade average + individual grades --------
         if (gradeProgress.length) {
 
-            const ownAvgXY    = gradeProgress.map((y, i) => ({ x: i, y }));
-            const ownGradesXY = actualGrades .map((y, i) => ({ x: i, y }));
+            const ownAvgXY = gradeProgress.map((y, i) => ({ x: i, y }));
+            const ownGradesXY = actualGrades.map((y, i) => ({ x: i, y }));
 
             const gradeDatasets = [
                 {
@@ -370,7 +371,7 @@ $sharedGradeDatasets    = buildSharedGradeDatasets($showShared, $userData, $myEx
                                 title: items => {
                                     const dsLabel = items[0].dataset.label;
                                     return dsLabel === 'Exam grade' || dsLabel === 'Average (cumulative)'
-                                        ? gradeLabels[ items[0].dataIndex ]
+                                        ? gradeLabels[items[0].dataIndex]
                                         : '';
                                 },
                                 label: ctx => {
@@ -389,7 +390,9 @@ $sharedGradeDatasets    = buildSharedGradeDatasets($showShared, $userData, $myEx
         }
     </script>
 
-<?php include __DIR__ . '/app/colorControls.php'; ?>
+    <footer>
+        <?php include __DIR__ . '/app/elements/footer.php'; ?>
+    </footer>
 </body>
 
 </html>

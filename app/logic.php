@@ -49,6 +49,16 @@ if ($isEditMode) {
         exit;
     }
 
+    else if (isset($_POST['update_starting_term'])) {
+        $startingTerm = (int) ($_POST['startingTerm'] ?? 1);
+        if ($startingTerm > 0) {
+            $data['startingTerm'] = $startingTerm;
+            saveData($data, $jsonFile);
+        }
+        header("Location: index.php?mode=edit");
+        exit;
+    }
+
     // Add a new module
     else if (isset($_POST['add_module'])) {
         $moduleName = trim($_POST['moduleName'] ?? '');

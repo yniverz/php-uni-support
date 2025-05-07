@@ -129,6 +129,16 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                 <button type="submit" name="update_semester_targets">Update</button>
             </form>
             <hr />
+
+            <form method="post">
+                <label>
+                    Subject-Specific Starting Term:
+                    <input type="text" name="startingTerm"
+                        value="<?php echo htmlspecialchars($data['startingTerm'] ?? 1); ?>" required />
+                </label>
+                <button type="submit" name="update_starting_term">Update</button>
+            </form>
+            <hr />
         <?php endif; ?>
 
         <p class="info-line">

@@ -131,11 +131,13 @@ function getUsersWithModuleTerms(string $originUsername, $moduleID, array $userD
             continue;        // malformed file; skip
         }
 
+        $startingTerm = $data['startingTerm'] ?? 1;
+
         // 4. Collect every term in which the module appears
         $terms = [];
         foreach ($data['modules'] as $module) {
             if (($module['id'] ?? null) == $moduleID) {
-                $terms[] = (int)$module['term'];
+                $terms[] = (int)$module['term'] - ($startingTerm - 1);
             }
         }
 

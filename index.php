@@ -433,7 +433,19 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                         </form>
                         <?php
                     } else if (isset($mod['notes'])) {
-                        echo "<p><strong>Notes:</strong> " . htmlspecialchars($mod['notes'] ?? '') . "</p>";
+
+                        $noteString = $mod['notes'] ?? '';
+                        $noteLines = explode("\\n", $noteString);
+                        
+                        if (count($noteLines) > 1) {
+                            echo "<p><strong>Notes:</strong></p>";
+                            for ($i = 0; $i < count($noteLines); $i++) {
+                                echo "<p>" . htmlspecialchars($noteLines[$i]) . "</p>";
+                            }
+                            echo "<p><strong>---------</strong></p>";
+                        } else {
+                            echo "<p><strong>Notes:</strong> " . htmlspecialchars($noteLines[0]) . "</p>";
+                        }
                     }
                     echo "</div>"; // end module-card
                 }

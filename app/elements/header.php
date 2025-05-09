@@ -140,5 +140,6 @@
   <a href="requirements.php" class="<?php echo $pageName == 'requirements.php' ? 'active' : ''; ?>">Requirements by
     Date</a>
   <a href="stats.php" class="<?php echo $pageName == 'stats.php' ? 'active' : ''; ?>">Statistics</a>
+  <a href="planner.php" class="<?= $pageName == 'planner.php' ? 'active' : '' ?>">Planner</a>
 
 </div>

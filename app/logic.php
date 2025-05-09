@@ -368,5 +368,23 @@ elseif (isset($_POST['toggle_req'])) {
     exit;
 }
 
+
+
+// Planner save handler
+elseif (isset($_POST['save_plan_json'])) {
+    $changes = json_decode($_POST['save_plan_json'], true) ?? [];
+    foreach ($changes as $idx => $newTerm) {
+        $idx = (int) $idx;
+        $newTerm = (int) $newTerm;
+        if (isset($data['modules'][$idx]) && $newTerm > 0) {
+            $data['modules'][$idx]['term'] = $newTerm;
+        }
+    }
+    sortModules($data['modules']);
+    saveData($data, $jsonFile);
+    header('Location: index.php');
+    exit;
+}
+
 // Finally, define $totalSoFar for the view (always needed)
 $totalSoFar = getTotalCreditsSoFar($data['modules']);

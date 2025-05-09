@@ -296,3 +296,113 @@ canvas {
     margin-top: 0.5rem;
     padding: 0.25rem 0.6rem;
   }
+
+
+/* Planner page extras */
+
+.planner-wrapper {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.left-pane {
+    flex: 1 1 0;
+    min-width: 38%;
+}
+
+.right-pane {
+    flex: 1.4 1 0;
+    max-height: calc(100vh - 180px);
+    overflow: auto;
+    position: sticky;
+    top: 100px;
+    border-left: 1px solid #ccc;
+    padding-left: 12px;
+}
+
+.term-column {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 18px;
+    background: #fafafa;
+}
+
+.term-head {
+    padding: 8px 10px;
+    font-weight: 600;
+    background: #eee;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.module-list {
+    list-style: none;
+    margin: 0;
+    padding: 8px 10px;
+    min-height: 30px;
+}
+
+.module-item {
+    padding: 6px 8px;
+    margin: 4px 0;
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    cursor: move;
+    user-select: none;
+}
+
+.module-item.dragging {
+    opacity: 0.5;
+}
+
+.module-item.done {
+    background: #f0f0f0;
+    color: #999;
+    border-color: #ddd;
+}
+
+.drop-target {
+    background: #d0ebff !important;
+}
+
+/***** Requirements preview *****/
+table.req-preview {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+table.req-preview th,
+table.req-preview td {
+    padding: 4px 6px;
+    border-bottom: 1px solid #ddd;
+}
+
+.term-row {
+    cursor: pointer;
+    user-select: none;
+}
+
+.term-row td {
+    background: #eee;
+    font-weight: 600;
+    border-bottom: 2px solid #ccc;
+}
+
+.term-row.collapsed td {
+    background: #ddd;
+    opacity: 0.8;
+}
+
+tr.grey {
+    background: #f0f0f0;
+    color: #999;
+}
+
+.hidden {
+    display: none;
+}

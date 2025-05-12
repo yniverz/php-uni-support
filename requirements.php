@@ -24,7 +24,8 @@ foreach ($data['modules'] as $module) {
             'description' => $req['description'],
             'credits' => $req['credits'],
             'done' => !empty($req['done']),
-            'date' => isset($req['date']) ? trim($req['date']) : ''
+            'date' => isset($req['date']) ? trim($req['date']) : '',
+            'uuid' => $req['uuid'],
         ];
     }
 }

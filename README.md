@@ -49,12 +49,15 @@ Users can
 <img width="909" alt="image" src="https://github.com/user-attachments/assets/d574498d-e6c5-4331-93ff-0ee5e076c216" />
 
 
-## Constraints
+### Constraints
 - A grade can only be entered if the requirement has more than 0 credits and is marked as completed.
 - You can only ever edit one requirement at a time, and will have to hit `Update` before you can edit another one.
 
 ### Requirement list
-Users can `View All Requirements by Date` to see all their requirements sorted by date with helpful information like how many days are left or hoe many days are inbetween two requirements.
+Users can View All `Requirements by Date` to see all their requirements sorted by date with helpful information like how many days are left or how many days are inbetween two requirements.
+
+### Requirements
+Requirements are clickable in the `home`and `Requirements by Date` view, which will open a details page where users can see the details of the requirement, attach notes and add Sub-Requirements if the task needs more detailed abstraction.
 
 ### Statistics and Charts
 - The application provides a summary of completed requirements and credits earned under the `Stats` page.

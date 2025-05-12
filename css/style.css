@@ -406,3 +406,20 @@ tr.grey {
 .hidden {
     display: none;
 }
+
+
+/* Requirement detail page extras */
+
+
+.sub-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.sub-list li {
+    margin: 4px 0;
+}
+
+.sub-list form {
+    display: inline;
+}

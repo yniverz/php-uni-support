@@ -3,12 +3,6 @@ session_start();
 
 require __DIR__ . '/app/config.php';
 require __DIR__ . '/app/helpers.php';
-
-if (!$isLoggedIn) {
-    header('Location: login.php');
-    exit;
-}
-
 require __DIR__ . '/app/logic.php';
 
 $modules = $data['modules'] ?? [];

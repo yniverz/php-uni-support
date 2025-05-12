@@ -251,7 +251,11 @@ function getTimeBetween($startDateStr, $endDateStr)
                             </td>
 
                             <td style=""><?php echo $dateDisplay; ?></td>
-                            <td style="padding:8px;"><?php echo $desc; ?></td>
+                            <td style="padding:8px;">
+                                <a href="requirement.php?id=<?php echo urlencode($req['uuid']); ?>" style="color:inherit; text-decoration:underline;">
+                                    <?php echo $desc; ?>
+                                </a>
+                            </td>
                             <td style="padding:8px;"><?php echo $term; ?>: <?php echo $mod; ?></td>
                             <td style="padding:8px;"><?php echo $credits === 0 ? '' : $credits; ?></td>
                         </tr>

@@ -16,7 +16,6 @@ require __DIR__ . '/app/helpers.php';  // if needed for any function
 
 // 1) Check if logged in
 if (!$isLoggedIn) {
-    // Not logged in => redirect to login
     header("Location: login.php");
     exit;
 }

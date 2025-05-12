@@ -5,6 +5,12 @@
  * Handling POST actions for editing modules, toggling requirements, etc.
  */
 
+
+if (!$isLoggedIn) {
+    header("Location: login.php");
+    exit;
+}
+
 // Determine if we're in edit mode
 $isEditMode = (isset($_GET['mode']) && $_GET['mode'] === 'edit');
 
@@ -148,6 +154,7 @@ if ($isEditMode) {
 
         if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex]) && $description !== '') {
             $newRequirement = [
+                'uuid' => uniqid(prefix: $userData[$_SESSION['username']]['userid'] . '_'),
                 'description' => $description,
                 'credits' => $credits,
                 'done' => false

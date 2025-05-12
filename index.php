@@ -9,14 +9,6 @@ session_start();
 
 require __DIR__ . '/app/config.php';
 require __DIR__ . '/app/helpers.php';
-
-// 1) Ensure user is logged in. Otherwise, send to login.
-if (!$isLoggedIn) {
-    header("Location: login.php");
-    exit;
-}
-
-// 2) Include all app logic
 require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
 
 // 3) At this point, $data is loaded, the POST actions are processed
@@ -394,10 +386,12 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                                     <input type="hidden" name="toggle_req" value="1">
                                     <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
                                     <input type="hidden" name="reqIndex" value="<?php echo $reqIndex; ?>">
-                                    <input type="checkbox" name="req_done" value="1" <?php if ($done)
-                                        echo 'checked'; ?>
-                                        onchange="this.form.submit();">
-                                    <?php echo ($grade ? "$grade — " : "") . "$desc" . ($credits === 0 ? "" : " — Credits: $credits") . ($date ? " — ($date)" : ""); ?>
+                                    <input type="checkbox" name="req_done" value="1" <?php if ($done) echo 'checked'; ?> onchange="this.form.submit();">
+                                    <?php echo ($grade ? "$grade — " : "") ?>
+                                    <a href="requirement.php?id=<?php echo urlencode($req['uuid']); ?>" style="color:inherit; text-decoration:underline;">
+                                    <?php echo "$desc"; ?>
+                                    </a>
+                                    <?php echo ($credits === 0 ? "" : " — Credits: $credits") . ($date ? " — ($date)" : ""); ?>
                                 </form>
                             </li>
                             <?php

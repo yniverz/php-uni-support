@@ -27,29 +27,47 @@
 
       <script>
         (() => {
-          /* ---- keys for localStorage + their fallback defaults ------------- */
-          // const defaults = {
-          //   bg1: "#f4f4f4",
-          //   bg2: "#f4f4f4",
-          //   module: "#f4f4f4",
-          //   moduleDone: "#f4f4f4",
-          //   moduleHighlight: "#e0f7fa",
-          //   text1: "#333",
-          //   text2: "#444",
-          //   a1: "#007BFF",
-          //   a2: "#e74c3c",
-          // };
+          /**
+           * Collect every custom property defined on :root and
+           * return an object { primary: "#00eb9b", gap: "1rem", … }
+           */
+          function collectRootVars() {
+            const out = {};
 
-          // get variable names from css root dynamically (all starting with --)
-          const root = getComputedStyle(document.documentElement);
-          const defaults = {};
-          for (const key of root) {
-            if (key.startsWith("--")) {
-              const value = root.getPropertyValue(key);
-              defaults[key.substring(2)] = value.trim();
+            /* ---------- 1. Fast path: CSS Typed OM ----------- */
+            const root = document.documentElement;
+            if (root.computedStyleMap) {                 // Chrome / Safari today
+              root.computedStyleMap()                   // StylePropertyMapReadOnly
+                  .forEach((val, name) => {
+                    if (name.startsWith('--')) {
+                      out[name.slice(2)] = val.toString().trim();
+                    }
+                  });
+              if (Object.keys(out).length) return out;  // done
             }
+
+            /* ---------- 2. Universal fallback --------------- */
+            for (const sheet of Array.from(document.styleSheets)) {
+              let rules;
+              try { rules = sheet.cssRules; }           // may throw on cross-origin
+              catch { continue; }
+
+              for (const rule of rules) {
+                if (rule.type !== CSSRule.STYLE_RULE) continue;
+                for (const name of rule.style) {
+                  if (!name.startsWith('--')) continue;
+
+                  // resolve the *current* value with getComputedStyle so that
+                  // overrides, cascade and :root inline changes are all honoured.
+                  const value = getComputedStyle(root).getPropertyValue(name);
+                  out[name.slice(2)] = value.trim();
+                }
+              }
+            }
+            return out;
           }
-          console.log(defaults);
+
+          const defaults = collectRootVars();
 
           // sort keys alphabetically
           const keys = Object.keys(defaults).sort((a, b) => a.localeCompare(b));

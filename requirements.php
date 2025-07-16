@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-
 // 1) Load config/data/helpers
 require __DIR__ . '/app/config.php';
 require __DIR__ . '/app/helpers.php';
@@ -11,23 +10,39 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 2) Build a flat array of ALL requirements from all modules
+// ------------------------------------------------------------------
+// FILTER: capture selected requirement description from GET param
+// ------------------------------------------------------------------
+$selectedDescription = isset($_GET['req']) ? trim($_GET['req']) : '';
+
+// 2) Build a flat array of ALL requirements from all modules AND collect distinct descriptions
 $allRequirements = [];
+$distinctRequirementCounts = [];
 
 foreach ($data['modules'] as $module) {
     $moduleName = $module['name'];
-    $moduleTerm = isset($module['term']) ? (int) $module['term'] : 999; // fallback if missing
+    $moduleTerm = isset($module['term']) ? (int)$module['term'] : 999; // fallback if missing
     foreach ($module['requirements'] as $req) {
+        $desc = $req['description'];
+        $distinctRequirementCounts[$desc] = ($distinctRequirementCounts[$desc] ?? 0) + 1;
+
         $allRequirements[] = [
-            'moduleName' => $moduleName,
-            'term' => $moduleTerm,  // used if no date
-            'description' => $req['description'],
-            'credits' => $req['credits'],
-            'done' => !empty($req['done']),
-            'date' => isset($req['date']) ? trim($req['date']) : '',
-            'uuid' => $req['uuid'],
+            'moduleName'   => $moduleName,
+            'term'         => $moduleTerm,  // used if no date
+            'description'  => $desc,
+            'credits'      => $req['credits'],
+            'done'         => !empty($req['done']),
+            'date'         => isset($req['date']) ? trim($req['date']) : '',
+            'uuid'         => $req['uuid'],
         ];
     }
+}
+
+// 2b) If a filter is active, reduce $allRequirements to only matching description
+if ($selectedDescription !== '') {
+    $allRequirements = array_values(array_filter($allRequirements, function ($r) use ($selectedDescription) {
+        return $r['description'] === $selectedDescription;
+    }));
 }
 
 // 3) Sort $allRequirements with the 4-level priority
@@ -40,8 +55,7 @@ usort($allRequirements, function ($a, $b) {
     $aDone = $a['done'] ? 1 : 0;
     $bDone = $b['done'] ? 1 : 0;
     if ($aDone !== $bDone) {
-        return $aDone <=> $bDone;
-        // not done (0) => first, done (1) => last
+        return $aDone <=> $bDone; // not done (0) => first, done (1) => last
     }
 
     // (b) If same done status, compare by date
@@ -133,6 +147,12 @@ function getTimeUntilDisplay($dateStr)
     return [$timeStr, $style];
 }
 
+/**
+ * getTimeBetween($startDateStr, $endDateStr)
+ * Returns [ $timeString, '' ]
+ * Used for the "Time Delta" column: difference between the current row's date
+ * and the *previous visible row's* date (after filtering).
+ */
 function getTimeBetween($startDateStr, $endDateStr)
 {
     if (!$startDateStr || !$endDateStr) {
@@ -147,7 +167,6 @@ function getTimeBetween($startDateStr, $endDateStr)
         return ['', ''];
     }
 
-    // Compare with "today"
     $diff = $startDt->diff($endDt);
     $days = $diff->days;        // absolute difference in days
 
@@ -172,6 +191,13 @@ function getTimeBetween($startDateStr, $endDateStr)
     return [$timeStr, ''];
 }
 
+// Prepare list of requirement options sorted naturally (case-insensitive)
+$reqOptions = $distinctRequirementCounts; // copy
+if (!empty($reqOptions)) {
+    // Natural, case-insensitive sort by key (description)
+    uksort($reqOptions, function($a,$b){return strnatcasecmp($a,$b);} );
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -180,6 +206,15 @@ function getTimeBetween($startDateStr, $endDateStr)
     <meta charset="utf-8">
     <title>All Requirements by Date</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* keep the select compact within the table header */
+        .req-filter-select {
+            max-width: 250px;
+        }
+        .req-filter-form {
+            margin: 4px 0 0 0;
+        }
+    </style>
 </head>
 
 <body>
@@ -192,7 +227,11 @@ function getTimeBetween($startDateStr, $endDateStr)
         </header>
 
         <?php if (empty($allRequirements)): ?>
-            <p>No requirements found.</p>
+            <?php if ($selectedDescription !== ''): ?>
+                <p>No requirements found for "<?php echo htmlspecialchars($selectedDescription); ?>".</p>
+            <?php else: ?>
+                <p>No requirements found.</p>
+            <?php endif; ?>
         <?php else: ?>
             <table style="width:100%; border-collapse:collapse;">
                 <thead>
@@ -200,13 +239,24 @@ function getTimeBetween($startDateStr, $endDateStr)
                         <th style="text-align:left; width:90px">Time<br>Until</th>
                         <th style="text-align:left; padding:8px;">Time<br>Delta</th>
                         <th style="text-align:left; width:100px">Date</th>
-                        <th style="text-align:left; padding:8px;">Requirement</th>
+                        <th style="text-align:left; padding:8px;">
+                            Requirement
+                            <form method="get" action="" class="req-filter-form">
+                                <select name="req" class="req-filter-select" onchange="this.form.submit()">
+                                    <option value=""<?php echo ($selectedDescription === '' ? ' selected' : ''); ?>>All requirements</option>
+                                    <?php foreach ($reqOptions as $optDesc => $cnt): ?>
+                                        <option value="<?php echo htmlspecialchars($optDesc, ENT_QUOTES, 'UTF-8'); ?>"<?php echo ($selectedDescription === $optDesc ? ' selected' : ''); ?>>
+                                            <?php echo htmlspecialchars($optDesc, ENT_QUOTES, 'UTF-8'); ?> (<?php echo $cnt; ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </form>
+                        </th>
                         <th style="text-align:left; padding:8px;">Term: Module</th>
                         <th style="text-align:left; padding:8px;">Credits</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php //foreach ($allRequirements as $req): ?>
                     <?php
                     $lastDate = '';
                     foreach ($allRequirements as $req):
@@ -222,7 +272,7 @@ function getTimeBetween($startDateStr, $endDateStr)
                         }
 
                         // "time until" column
-                        list($timeStr, $timeStyle) = getTimeUntilDisplay($req['date']);
+                        list($timeStrUntil, $timeStyleUntil) = getTimeUntilDisplay($req['date']);
 
                         $dateDisplay = $req['date'] ? $req['date'] : '—';
                         $desc = htmlspecialchars($req['description']);
@@ -233,25 +283,25 @@ function getTimeBetween($startDateStr, $endDateStr)
                         ?>
                         <tr style="border-bottom:1px solid #eee; <?php echo $rowStyle; ?>">
                             <!-- Time Until -->
-                            <td style="<?php echo $timeStyle; ?>">
-                                <?php echo $timeStr; ?>
+                            <td style="<?php echo $timeStyleUntil; ?>">
+                                <?php echo $timeStrUntil; ?>
                             </td>
 
                             <!-- Time Between -->
-                            <td style="padding:8px; <?php echo $timeStyle; ?>">
+                            <td style="padding:8px; <?php echo $timeStyleUntil; ?>">
                                 <?php
                                 if ($req['date'] && $lastDate) {
-                                    list($timeStr, $timeStyle) = getTimeBetween($req['date'], $lastDate);
-                                    echo $timeStr;
+                                    list($timeStrBetween, $unusedStyle) = getTimeBetween($req['date'], $lastDate);
+                                    echo $timeStrBetween;
                                 } else {
                                     echo '—';
                                 }
-
+                                // update $lastDate to current row date *after* computing delta
                                 $lastDate = $req['date'];
                                 ?>
                             </td>
 
-                            <td style=""><?php echo $dateDisplay; ?></td>
+                            <td><?php echo $dateDisplay; ?></td>
                             <td style="padding:8px;">
                                 <a href="requirement.php?id=<?php echo urlencode($req['uuid']); ?>" style="color:inherit; text-decoration:underline;">
                                     <?php echo $desc; ?>
@@ -265,7 +315,6 @@ function getTimeBetween($startDateStr, $endDateStr)
             </table>
         <?php endif; ?>
     </div>
-
 
     <footer>
         <?php include __DIR__ . '/app/elements/footer.php'; ?>

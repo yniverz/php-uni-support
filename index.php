@@ -76,6 +76,145 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                     window.location.reload();
                 }
             });
+
+            /* ---------------------- ADDED BLOCK (auto-submit + composite sync) ---------------------- */
+            document.addEventListener('DOMContentLoaded', () => {
+                const markers = document.querySelectorAll('form input[name="update_requirement"][value="1"]');
+
+                // Helpers for composite date
+                const pad = (n, len) => String(n).padStart(len, '0');
+                const daysInMonth = (y, m) => new Date(y, m, 0).getDate(); // m: 1-12
+                const validFullDate = (d, m, y) => {
+                    if (!Number.isFinite(d) || !Number.isFinite(m) || !Number.isFinite(y)) return false;
+                    if (m < 1 || m > 12) return false;
+                    const dim = daysInMonth(y, m);
+                    return d >= 1 && d <= dim;
+                };
+                const toISO = (d, m, y) => `${pad(y, 4)}-${pad(m, 2)}-${pad(d, 2)}`;
+
+                // Read parts and write to hidden <input type="date" name="..."> inside the wrapper
+                function syncCompositeHidden(wrapper) {
+                    const day = wrapper.querySelector('[data-part="day"]');
+                    const month = wrapper.querySelector('[data-part="month"]');
+                    const year = wrapper.querySelector('[data-part="year"]');
+                    const hidden = wrapper.querySelector('input[type="date"][name="' + wrapper.dataset.name + '"]');
+                    if (!day || !month || !year || !hidden) return false;
+
+                    const d = parseInt(day.value, 10);
+                    const m = parseInt(month.value, 10);
+                    const y = parseInt(year.value, 10);
+
+                    if (validFullDate(d, m, y)) {
+                        hidden.value = toISO(d, m, y);
+                    } else {
+                        // Set empty string (valid for a non-required date). Do NOT set a custom validity error.
+                        hidden.value = '';
+                    }
+                    // Always clear any previous custom validity so the hidden control is never "invalid".
+                    if (typeof hidden.setCustomValidity === 'function') hidden.setCustomValidity('');
+                    return validFullDate(d, m, y);
+                }
+
+                // Ensure all composites in a form are synced just before submit
+                function syncAllCompositesInForm(form) {
+                    const composites = form.querySelectorAll('.date-composite[data-name]');
+                    composites.forEach(w => syncCompositeHidden(w));
+                    // Do not block submission here; requirement_date is optional.
+                    return true;
+                }
+
+                markers.forEach(marker => {
+                    const form = marker.closest('form');
+                    if (!form) return;
+
+                    let submitTimeout;
+                    const requestAutoSubmit = (delay = 150) => {
+                        clearTimeout(submitTimeout);
+                        submitTimeout = setTimeout(() => {
+                            // Always sync composites immediately before submitting
+                            syncAllCompositesInForm(form);
+                            if (typeof form.requestSubmit === 'function') {
+                                form.requestSubmit();
+                            } else {
+                                form.submit(); // falls back without constraint validation
+                            }
+                        }, delay);
+                    };
+
+                    // Handle non-composite fields
+                    const isDateLike = (el) =>
+                        el.matches('input[type="date"], input[type="datetime-local"], input[type="month"], input[type="week"], input[type="time"]');
+
+                    const isComplete = (el) => {
+                        if (el.type === 'time') return el.value !== '' && el.checkValidity();
+                        if ('valueAsDate' in el && el.valueAsDate instanceof Date) return true;
+                        return el.value !== '' && el.checkValidity();
+                    };
+
+                    const elementTimers = new WeakMap();
+                    const fields = form.querySelectorAll('input, textarea, select');
+
+                    fields.forEach(el => {
+                        if (el.type === 'hidden') return;
+                        if (el.closest('.date-composite')) return; // composite handled via wrapper listeners
+
+                        const onChange = () => {
+                            if (isDateLike(el) && !isComplete(el)) return;
+                            requestAutoSubmit();
+                        };
+                        el.addEventListener('change', onChange);
+
+                        if (isDateLike(el)) {
+                            // Avoid blur on native date-like inputs; use input+debounce once complete
+                            const onInput = () => {
+                                if (!isComplete(el)) return;
+                                clearTimeout(elementTimers.get(el));
+                                const t = setTimeout(() => requestAutoSubmit(0), 250);
+                                elementTimers.set(el, t);
+                            };
+                            el.addEventListener('input', onInput);
+                        } else {
+                            el.addEventListener('blur', onChange);
+                        }
+
+                        el.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                requestAutoSubmit(0);
+                            }
+                        });
+                    });
+
+                    // Composite wrapper behavior (listen on the parent)
+                    const wrapper = form.querySelector('.date-composite[data-name="requirement_date"]');
+                    if (wrapper) {
+                        // Keep hidden in sync while typing (no submit here)
+                        wrapper.addEventListener('input', (e) => {
+                            if (e.target && e.target.hasAttribute('data-part')) {
+                                syncCompositeHidden(wrapper);
+                            }
+                        });
+
+                        // Submit when the wrapper as a whole loses focus (i.e., user exits the "field")
+                        wrapper.addEventListener('focusout', (e) => {
+                            if (e.relatedTarget && wrapper.contains(e.relatedTarget)) return; // focus still inside
+                            syncCompositeHidden(wrapper); // update hidden just before submitting
+                            requestAutoSubmit(0);
+                        });
+
+                        // Submit on Enter within any of the parts
+                        wrapper.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                syncCompositeHidden(wrapper); // update hidden just before submitting
+                                requestAutoSubmit(0);
+                            }
+                        });
+                    }
+                });
+            });
+            /* ------------------- END ADDED BLOCK (auto-submit + composite sync) -------------------- */
+
         })();
     </script>
 </head>
@@ -342,7 +481,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                             // In edit mode, show as input fields + update button
                             ?>
                             <li>
-                                <form method="post" style="display:inline;">
+                                <form method="post" style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                     <input type="hidden" name="update_requirement" value="1">
                                     <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
                                     <input type="hidden" name="reqIndex" value="<?php echo $reqIndex; ?>">
@@ -359,7 +498,41 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                                         <input type="number" name="requirement_grade" step="0.1" value="<?php echo $grade; ?>"
                                             style="width:60px;" title="Grade (optional)" />
                                     <?php endif; ?>
-                                    <input type="date" name="requirement_date" value="<?php echo $date; ?>" />
+                                    <!-- <input type="date" name="requirement_date" value="<?php echo $date; ?>" /> -->
+                                    <?php
+                                    // Pre-fill parts from $date if present (YYYY-MM-DD)
+                                    $dDay = $dMonth = $dYear = '';
+                                    if (!empty($date) && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $m)) {
+                                        $dYear = (int) $m[1];
+                                        $dMonth = (int) $m[2];
+                                        $dDay = (int) $m[3];
+                                    }
+                                    ?>
+                                    <div class="date-composite" data-name="requirement_date"
+                                        style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #c7c7c7;border-radius:6px;background:#fff;line-height:1;"
+                                        onfocusin="this.style.borderColor='#2684FF';this.style.boxShadow='0 0 0 3px rgba(38,132,255,.15)';"
+                                        onfocusout="this.style.borderColor='#c7c7c7';this.style.boxShadow='none';">
+
+                                        <input type="number" inputmode="numeric" min="1" max="31" step="1" placeholder="DD" aria-label="Day"
+                                            data-part="day" value="<?php echo $dDay; ?>"
+                                            style="width:2.7em;text-align:center;border:0;outline:0;background:transparent;line-height:1.2;appearance:textfield;-moz-appearance:textfield;-webkit-appearance:none;padding:0;">
+
+                                        <span aria-hidden="true" style="color:#888;">/</span>
+
+                                        <input type="number" inputmode="numeric" min="1" max="12" step="1" placeholder="MM"
+                                            aria-label="Month" data-part="month" value="<?php echo $dMonth; ?>"
+                                            style="width:2.7em;text-align:center;border:0;outline:0;background:transparent;line-height:1.2;appearance:textfield;-moz-appearance:textfield;-webkit-appearance:none;padding:0;">
+
+                                        <span aria-hidden="true" style="color:#888;">/</span>
+
+                                        <input type="number" inputmode="numeric" min="1900" max="2100" step="1" placeholder="YYYY"
+                                            aria-label="Year" data-part="year" value="<?php echo $dYear; ?>"
+                                            style="width:3.8em;text-align:center;border:0;outline:0;background:transparent;line-height:1.2;appearance:textfield;-moz-appearance:textfield;-webkit-appearance:none;padding:0;">
+
+                                        <!-- Hidden native field actually submitted to the server -->
+                                        <input type="date" name="requirement_date" value="<?php echo $date; ?>" hidden>
+                                    </div>
+
 
                                     <!-- Update button -->
                                     <button type="submit">
@@ -386,10 +559,13 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                                     <input type="hidden" name="toggle_req" value="1">
                                     <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
                                     <input type="hidden" name="reqIndex" value="<?php echo $reqIndex; ?>">
-                                    <input type="checkbox" name="req_done" value="1" <?php if ($done) echo 'checked'; ?> onchange="this.form.submit();">
+                                    <input type="checkbox" name="req_done" value="1" <?php if ($done)
+                                        echo 'checked'; ?>
+                                        onchange="this.form.submit();">
                                     <?php echo ($grade ? "$grade — " : "") ?>
-                                    <a href="requirement.php?id=<?php echo urlencode($req['uuid']); ?>" style="color:inherit; text-decoration:underline;">
-                                    <?php echo "$desc"; ?>
+                                    <a href="requirement.php?id=<?php echo urlencode($req['uuid']); ?>"
+                                        style="color:inherit; text-decoration:underline;">
+                                        <?php echo "$desc"; ?>
                                     </a>
                                     <?php echo ($credits === 0 ? "" : " — Credits: $credits") . ($date ? " — ($date)" : ""); ?>
                                 </form>
@@ -430,7 +606,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
 
                         $noteString = $mod['notes'] ?? '';
                         $noteLines = explode("\\n", $noteString);
-                        
+
                         if (count($noteLines) > 1) {
                             echo "<p><strong>Notes:</strong></p>";
                             for ($i = 0; $i < count($noteLines); $i++) {

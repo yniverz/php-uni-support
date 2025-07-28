@@ -37,6 +37,7 @@ All data (user accounts and module information) is stored in JSON files statical
 
 ### Edit Mode
 Edit mode can be activated by the respective link at the top, or by pressing the `e` key.
+Changes to requirements
 
 ### Module Management
 Users can

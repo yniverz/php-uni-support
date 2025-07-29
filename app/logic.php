@@ -268,13 +268,6 @@ if ($isEditMode) {
         $moduleName = trim($_POST['module_name'] ?? '');
         $moduleId = trim($_POST['module_id'] ?? '');
 
-        // check if any of the fields are empty
-        if ($moduleName === '' || $moduleId === '') {
-            // redirect back to edit mode
-            header("Location: index.php?mode=edit");
-            exit;
-        }
-
         // check if moduleId exists in globalModuleIDs
         if (!in_array($moduleId, $globalModuleIDs)) {
 
@@ -290,7 +283,7 @@ if ($isEditMode) {
                     foreach ($temp_data['modules'] as $module) {
                         if (isset($module['id'])) {
                             $allUsedIDs[] = $module['id'];
-                            echo "found id " . $module['id'] . "<br>";
+                            // echo "found id " . $module['id'] . "<br>";
                         }
                     }
                 }
@@ -303,7 +296,7 @@ if ($isEditMode) {
 
             // remove all ids from $globalModuleIDs that are in toBeRemoved
             foreach ($toBeRemoved as $id) {
-                echo "removing $id<br>";
+                // echo "removing $id<br>";
                 unset($globalModuleIDs[array_search($id, $globalModuleIDs)]);
             }
 

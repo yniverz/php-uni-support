@@ -268,6 +268,13 @@ if ($isEditMode) {
         $moduleName = trim($_POST['module_name'] ?? '');
         $moduleId = trim($_POST['module_id'] ?? '');
 
+        // check if any of the fields are empty
+        if ($moduleName === '' || $moduleId === '') {
+            // redirect back to edit mode
+            header("Location: index.php?mode=edit");
+            exit;
+        }
+
         // check if moduleId exists in globalModuleIDs
         if (!in_array($moduleId, $globalModuleIDs)) {
 

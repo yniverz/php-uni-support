@@ -11,8 +11,32 @@ require __DIR__ . '/app/config.php';
 require __DIR__ . '/app/helpers.php';
 require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
 
-// 3) At this point, $data is loaded, the POST actions are processed
-//    We also have $isEditMode, $totalSoFar, etc. from logic.php
+// ----------------------------------------------------------------------------
+// NEW: handle "view" toggle via GET param. Default is assigned-term view.
+// When ?view=ideal is present, we render/sort/group by idealTerm instead.
+// ----------------------------------------------------------------------------
+$view = (isset($_GET['view']) && $_GET['view'] === 'ideal') ? 'ideal' : 'assigned';
+$groupByIdeal = ($view === 'ideal');
+
+// Build a modules array for DISPLAY ONLY.
+// If grouping by ideal, we copy each module and temporarily set its 'term' to idealTerm.
+// This array is used for grouping and credit calculations, but ALL forms still refer
+// back to the original indexes via hidden moduleIndex fields as before.
+$modulesForDisplay = [];
+if (!empty($data['modules'])) {
+    foreach ($data['modules'] as $idx => $mod) {
+        $copy = $mod;
+        if ($groupByIdeal) {
+            // Fall back to assigned term if idealTerm missing
+            $copy['term'] = (int) ($mod['idealTerm'] ?? $mod['term']);
+        } else {
+            $copy['term'] = (int) $mod['term'];
+        }
+        $modulesForDisplay[$idx] = $copy; // preserve original indexes
+    }
+} else {
+    $modulesForDisplay = [];
+}
 
 ?>
 <!DOCTYPE html>
@@ -226,6 +250,30 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
             <?php include __DIR__ . '/app/elements/header.php'; ?>
         </header>
 
+        <?php if (!$isEditMode): ?>
+            <!-- NEW: simple top-of-page toggle (normal mode only) to switch between Assigned vs Ideal view -->
+            <?php
+            // Build links that preserve existing GET params except 'view'
+            $qs = $_GET;
+            unset($qs['view']);
+            $basePath = strtok($_SERVER['REQUEST_URI'], '?');
+            $assignedUrl = $basePath . (count($qs) ? '?' . http_build_query($qs) : '');
+            $idealUrl    = $basePath . '?' . http_build_query(array_merge($qs, ['view' => 'ideal']));
+            ?>
+            <div class="info-line" style="margin-top:10px;">
+                <strong>View:</strong>
+                <?php if ($groupByIdeal): ?>
+                    <a href="<?php echo htmlspecialchars($assignedUrl); ?>">By Assigned Term</a>
+                    &nbsp;|&nbsp;
+                    <span><strong>By Ideal Term</strong></span>
+                <?php else: ?>
+                    <span><strong>By Assigned Term</strong></span>
+                    &nbsp;|&nbsp;
+                    <a href="<?php echo htmlspecialchars($idealUrl); ?>">By Ideal Term</a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
         <?php if ($isEditMode): ?>
             <!-- EDIT MODE: Show forms for changing settings -->
             <h2>Account Settings</h2>
@@ -282,52 +330,19 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
         </p>
         <br />
 
-        <?php if ($isEditMode): ?>
-            <!-- EDIT MODE: Add module form -->
-            <h2>Add a New Module</h2>
-            <form method="post">
-                <table style='border-collapse: collapse;'>
-                    <tr>
-                        <td style='padding: 4px 10px;'>
-                            <label for="add_module_name">Module Name:</label>
-                        </td>
-                        <td style='padding: 4px 10px;'>
-                            <input id="add_module_name" type="text" name="moduleName" required />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 4px 10px;'>
-                            <label for="add_module_ideal_term">Ideal Term:</label>
-                        </td>
-                        <td style='padding: 4px 10px;'>
-                            <input id="add_module_ideal_term" type="number" name="idealTerm" value="1" required />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 4px 10px;'>
-                            <label for="add_module_assigned_term">Assign to Term:</label>
-                        </td>
-                        <td style='padding: 4px 10px;'>
-                            <input id="add_module_assigned_term" type="number" name="assignedTerm" value="1" required />
-                        </td>
-                    </tr>
-                </table>
-                <button type="submit" name="add_module">Add Module</button>
-            </form>
-            <hr />
-        <?php endif; ?>
-
         <?php
-        // Now display the modules by term
-        if (!empty($data['modules'])) {
+        // Display the modules by chosen "display term" (assigned vs ideal)
+        // Build groups using $modulesForDisplay (which has 'term' set for display).
+        if (!empty($modulesForDisplay)) {
 
-            // group by term
+            // group by term for display
             $modulesByTerm = [];
-            foreach ($data['modules'] as $index => $mod) {
+            foreach ($modulesForDisplay as $index => $mod) {
                 $term = (int) $mod['term'];
                 if (!isset($modulesByTerm[$term])) {
                     $modulesByTerm[$term] = [];
                 }
+                // Keep original index for form actions
                 $modulesByTerm[$term][] = ['index' => $index, 'module' => $mod];
             }
 
@@ -337,14 +352,20 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
             $neededCredits = $data['totalNeededCredits'];
 
             foreach ($modulesByTerm as $termNumber => $list) {
-                $termCredits = getTermCredits($data['modules'], $termNumber);
+                // Use the display modules for all term-based credit calculations
+                $termCredits = getTermCredits($modulesForDisplay, $termNumber);
+
+                // Header label changes depending on the view
+                $termLabel = $groupByIdeal ? "Ideal Term $termNumber" : "Term $termNumber";
+
                 echo "<div class='term-block'>";
-                echo "<h2>Term $termNumber ($termCredits Credits)</h2>";
+                echo "<h2>$termLabel ($termCredits Credits)</h2>";
 
                 // each module
                 foreach ($list as $entry) {
-                    $mIndex = $entry['index'];
-                    $mod = $entry['module'];
+                    $mIndex = $entry['index'];      // index into original $data['modules']
+                    $mod = $data['modules'][$mIndex]; // Use the original for form values & flags
+                    $displayMod = $entry['module']; // copy that has 'term' possibly replaced
                     $moduleClass = "module-card";
                     $highlighted = isset($mod['highlighted']) ? $mod['highlighted'] : false;
                     if ($mod['allDone']) {
@@ -355,7 +376,6 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                     }
 
                     echo "<div class='$moduleClass'>";
-                    // echo "<strong>" . htmlspecialchars($mod['name']) . "</strong>";
                     if ($isEditMode) {
                         ?>
                         <form method="post" style="display:inline;">
@@ -379,8 +399,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                     <form method="post" style="display:inline;">
                         <input type="hidden" name="toggle_highlight" value="1">
                         <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
-                        <input type="checkbox" name="highlighted" value="1" <?php if ($highlighted)
-                            echo 'checked'; ?>
+                        <input type="checkbox" name="highlighted" value="1" <?php if ($highlighted) echo 'checked'; ?>
                             onchange="this.form.submit();">
                     </form>
                     <?php
@@ -394,7 +413,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                             $thisTermPrefix = $mod['allDone'] ? "You joined: " : "You will join: ";
                             $thisTerms = "";
                             foreach ($similarUsers as $user => $terms) {
-                                if (in_array($mod['term'], $terms)) {
+                                if (in_array($displayMod['term'], $terms)) { // use display term here
                                     $thisTerms .= htmlspecialchars($user) . ", ";
                                 }
                             }
@@ -407,7 +426,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                             $otherTermsPrefix = "Students in Other Terms: ";
                             $otherTerms = "";
                             foreach ($similarUsers as $user => $terms) {
-                                if (in_array($mod['term'], $terms)) {
+                                if (in_array($displayMod['term'], $terms)) {
                                     continue; // skip this user
                                 }
                                 $otherTerms .= "<i>" . htmlspecialchars($user) . "</i> (Term: " . implode(", ", $terms) . "), ";
@@ -559,8 +578,7 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                                     <input type="hidden" name="toggle_req" value="1">
                                     <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
                                     <input type="hidden" name="reqIndex" value="<?php echo $reqIndex; ?>">
-                                    <input type="checkbox" name="req_done" value="1" <?php if ($done)
-                                        echo 'checked'; ?>
+                                    <input type="checkbox" name="req_done" value="1" <?php if ($done) echo 'checked'; ?>
                                         onchange="this.form.submit();">
                                     <?php echo ($grade ? "$grade — " : "") ?>
                                     <a href="requirement.php?id=<?php echo urlencode($req['uuid']); ?>"
@@ -620,13 +638,14 @@ require __DIR__ . '/app/logic.php';    // Main "edit" / "view" mode logic
                     echo "</div>"; // end module-card
                 }
 
-                $haveCreditsSoFar = getCompletedCreditsUpToTerm($data['modules'], $termNumber);
-                $wantCreditsSoFar = getAllCreditsUpToTerm($data['modules'], $termNumber);
+                // Use display modules for the cumulative credit summaries as well
+                $haveCreditsSoFar = getCompletedCreditsUpToTerm($modulesForDisplay, $termNumber);
+                $wantCreditsSoFar = getAllCreditsUpToTerm($modulesForDisplay, $termNumber);
 
                 $metTargetColor = "rgb(142, 205, 142)"; // default color
-        
+
                 echo "<div class='credit-summary'>";
-                echo "<p><strong>Credits after Term $termNumber:</strong></p>";
+                echo "<p><strong>Credits after " . htmlspecialchars($termLabel) . ":</strong></p>";
                 echo "<table style='border-collapse: collapse;'>";
                 echo "<tr><td style='padding: 4px 10px;'>Have:</td><td style='padding: 4px 10px;'>$haveCreditsSoFar</td></tr>";
                 echo "<tr" . ($haveCreditsSoFar >= $wantCreditsSoFar ? " style='color: " . $metTargetColor . ";'" : "") . "><td style='padding: 4px 10px;'>Want:</td><td style='padding: 4px 10px;'>$wantCreditsSoFar</td></tr>";

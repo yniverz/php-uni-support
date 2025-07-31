@@ -57,7 +57,7 @@ Users can
 ### Requirement list
 Users can View All `Requirements by Date` to see all their requirements sorted by date with helpful information like how many days are left or how many days are inbetween two requirements.
 
-The User can also filter the requirements by module, and search for requirements by name or description. Use quotes to search for exact matches.
+The User can also filter the requirements by module, and search for requirements by name or description. Use an exclamation mark to search for exact matches like "!Exam" to find requirements with that exact name.
 
 ### Requirements
 Requirements are clickable and completable in the `home`and `Requirements by Date` view, which will open a details page where users can see the details of the requirement, attach notes and add Sub-Requirements if the task needs more detailed abstraction.

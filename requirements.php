@@ -91,40 +91,44 @@ $equalsIgnoreCase = function ($a, $b) {
  * Extract quoted inner text if user wrapped the query in quotes.
  * Supports straight quotes " ", smart quotes “ ” and „ “, « », ‹ ›, and ' '.
  */
+// Use a single leading "!" to request exact matching.
+// Examples:
+//   "!Anmeldung Prüfung"  => [true, "Anmeldung Prüfung"]
+//   "  !   Foo Bar  "     => [true, "Foo Bar"]
+//   "!!not exact"         => [false, "!!not exact"]   // double "!" is treated as normal search
+//   "   "                  => [false, "   "]
 $extractQuoted = function ($s) {
-    $sTrim = trim($s);
-    if ($sTrim === '') return [false, $s];
+    // Keep original for fallback, but trim only LEFT for prefix detection
+    $sLtrim = ltrim($s);
+    if ($sLtrim === '') {
+        return [false, $s];
+    }
 
-    $pairs = [
-        '"' => '"',
-        '“' => '”',
-        '„' => '“',
-        '«' => '»',
-        '‹' => '›',
-        '‘' => '’',
-        '‚' => '‘',
-        "'" => "'",
-    ];
-
+    // Multibyte-safe read of the first two characters
     if (function_exists('mb_substr')) {
-        $first = mb_substr($sTrim, 0, 1, 'UTF-8');
-        $last  = mb_substr($sTrim, -1, 1, 'UTF-8');
-        $len   = mb_strlen($sTrim, 'UTF-8');
-        if (isset($pairs[$first]) && $pairs[$first] === $last && $len >= 2) {
-            $inner = mb_substr($sTrim, 1, $len - 2, 'UTF-8');
+        $first  = mb_substr($sLtrim, 0, 1, 'UTF-8');
+        $second = mb_substr($sLtrim, 1, 1, 'UTF-8');
+        if ($first === '!' && $second !== '!') {
+            // Remove the leading "!" and any spaces immediately after it
+            $inner = ltrim(mb_substr($sLtrim, 1, null, 'UTF-8'));
+            // If nothing left after "!", treat as non-exact
+            if ($inner === '') return [false, $s];
             return [true, $inner];
         }
     } else {
-        $first = substr($sTrim, 0, 1);
-        $last  = substr($sTrim, -1);
-        $len   = strlen($sTrim);
-        if (isset($pairs[$first]) && $pairs[$first] === $last && $len >= 2) {
-            $inner = substr($sTrim, 1, $len - 2);
+        $first  = substr($sLtrim, 0, 1);
+        $second = substr($sLtrim, 1, 1);
+        if ($first === '!' && $second !== '!') {
+            $inner = ltrim(substr($sLtrim, 1));
+            if ($inner === '') return [false, $s];
             return [true, $inner];
         }
     }
+
+    // No leading single "!" => normal (substring) search
     return [false, $s];
 };
+
 
 // 2b) Apply filter
 $noResults = false;
@@ -316,14 +320,13 @@ if (!empty($reqOptions)) {
                                 name="req"
                                 class="req-filter-select"
                                 list="req-options"
-                                placeholder='Search requirements… (use "exact phrase" for exact match)'
+                                placeholder='Search requirements… (use !exact phrase for exact match)'
                                 value="<?php echo htmlspecialchars($selectedDescription, ENT_QUOTES, 'UTF-8'); ?>"
-                                title='Type to filter. Use quotes for exact matches, e.g. "Anmeldung Prüfung".'
+                                title='Type to filter. Use ! for exact matches, e.g. "!Anmeldung Prüfung".'
                             >
                             <datalist id="req-options">
                                 <?php foreach ($reqOptions as $optDesc => $cnt): ?>
-                                    <option value="<?php echo htmlspecialchars($optDesc, ENT_QUOTES, 'UTF-8'); ?>"></option>
-                                    <option value="<?php echo htmlspecialchars('"' . $optDesc . '"', ENT_QUOTES, 'UTF-8'); ?>"></option>
+                                    <option value="<?php echo htmlspecialchars('!' . $optDesc, ENT_QUOTES, 'UTF-8'); ?>"></option>
                                 <?php endforeach; ?>
                             </datalist>
                             <?php if ($selectedDescription !== ''): ?>
@@ -426,7 +429,7 @@ if (!empty($reqOptions)) {
     </footer>
 
     <!-- Auto-submit search after typing stops (debounced) -->
-    <script>
+    <!-- <script>
     (function () {
         var form = document.querySelector('.req-filter-form');
         if (!form) return;
@@ -439,7 +442,7 @@ if (!empty($reqOptions)) {
             t = setTimeout(function () { form.submit(); }, 300);
         });
     })();
-    </script>
+    </script> -->
 
     <!-- Optimistic checkbox + background save + full reload -->
     <script>

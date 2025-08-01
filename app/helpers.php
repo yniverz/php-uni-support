@@ -21,7 +21,7 @@ function getAverageGrade($modules)
 
     foreach ($modules as $module) {
         foreach ($module['requirements'] as $req) {
-            if (!empty($req['grade'])) {
+            if (!empty($req['grade']) && !empty($req['done'])) {
                 $totalCredits += $req['credits'];
                 $totalGradePoints += $req['grade'] * $req['credits'];
             }

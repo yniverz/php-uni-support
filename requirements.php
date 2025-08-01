@@ -3,7 +3,7 @@ session_start();
 
 // 1) Load config/data/helpers
 require __DIR__ . '/app/config.php';
-require __DIR__ . '/app/helpers.php'; // contains markRequirementDone/applyRequirementDoneOverrides
+require __DIR__ . '/app/helpers.php';
 
 if (!$isLoggedIn) {
     header("Location: login.php");
@@ -11,14 +11,30 @@ if (!$isLoggedIn) {
 }
 
 // ------------------------------------------------------------------
-// Handle toggle of "done" via POST (from JS fetch or normal form submit fallback)
+// Handle toggle of "done" via POST
 // ------------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && (($_POST['_action'] ?? '') === 'toggle_done' || ($_POST['action'] ?? '') === 'toggle_done')) {
     $uuid = isset($_POST['uuid']) ? trim($_POST['uuid']) : '';
     $targetDone = (isset($_POST['target_done']) && $_POST['target_done'] == '1');
 
-    if ($uuid !== '' && function_exists('markRequirementDone')) {
-        markRequirementDone($uuid, $targetDone);
+    if ($uuid !== '') {
+            
+        $moduleIndex = -1;
+        $requirementIndex = -1;
+        foreach ($data['modules'] as $mIndex => $module) {
+            foreach ($module['requirements'] as $rIndex => $req) {
+                if ($req['uuid'] === $uuid) {
+                    $moduleIndex = $mIndex;
+                    $requirementIndex = $rIndex;
+                    break 2; // exit both loops
+                }
+            }
+        }
+        if ($moduleIndex !== -1 && $requirementIndex !== -1) {
+            $data['modules'][$moduleIndex]['requirements'][$requirementIndex]['done'] = $targetDone ? '1' : '';
+            updateModuleCompletionStatus($data['modules'][$moduleIndex]);
+            saveData($data, $jsonFile);
+        }
     }
 
     // If this is a background (fetch) call, return a tiny 204/empty response.
@@ -66,12 +82,6 @@ foreach ($data['modules'] as $module) {
     }
 }
 
-// ------------------------------------------------------------------
-// Apply per-session "done" overrides (from helpers.php)
-// ------------------------------------------------------------------
-if (function_exists('applyRequirementDoneOverrides')) {
-    $allRequirements = applyRequirementDoneOverrides($allRequirements);
-}
 
 // --- Helpers for searching ---
 $contains = function ($haystack, $needle) {

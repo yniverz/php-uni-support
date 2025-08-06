@@ -3,7 +3,7 @@
 session_start();
 
 /**
- * The main "University Module Support System" page.
+ * The main "Term Planner" page.
  * We assume user is logged in. If not, we redirect to login.php.
  */
 
@@ -44,7 +44,7 @@ if (!empty($data['modules'])) {
 
 <head>
     <meta charset="utf-8" />
-    <title>University Module Support System</title>
+    <title>Term Planner</title>
     <link rel="stylesheet" href="css/style.css" />
     <script>
         (function () {

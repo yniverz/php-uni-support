@@ -120,7 +120,7 @@ $sharedGradeDatasets = buildSharedGradeDatasets($showShared, $userData, $myExamC
 
 <head>
     <meta charset="utf-8">
-    <title>Stats - University Module Support System</title>
+    <title>Stats - Term Planner</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-trendline/dist/chartjs-plugin-trendline.min.js"></script>

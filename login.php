@@ -40,7 +40,7 @@ if (isset($_POST['login_submit'])) {
 
 <head>
     <meta charset="utf-8" />
-    <title>University Module Support System - Login</title>
+    <title>Term Planner - Login</title>
     <link rel="stylesheet" href="css/style.css" />
 </head>
 

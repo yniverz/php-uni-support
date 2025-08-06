@@ -68,7 +68,7 @@ if (isset($_POST['register_submit'])) {
 
 <head>
     <meta charset="utf-8" />
-    <title>University Module Support System - Register</title>
+    <title>Term Planner - Register</title>
     <link rel="stylesheet" href="css/style.css" />
 </head>
 

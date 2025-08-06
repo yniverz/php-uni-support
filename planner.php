@@ -16,7 +16,7 @@ $modules = $data['modules'] ?? [];
 
 <head>
     <meta charset="utf-8">
-    <title>Plan Terms - University Module Support System</title>
+    <title>Term Planner</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 

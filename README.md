@@ -1,4 +1,4 @@
-# University Module Support System
+# Term Planner
 
 This repository contains a simple PHP-based application that allows users to manage “modules” (courses) and their associated requirements or tasks. It includes functionality for:
  - User registration, login, and logout

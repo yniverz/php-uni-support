@@ -52,7 +52,7 @@ function formatDateICS($date)
 
 echo "BEGIN:VCALENDAR\r\n";
 echo "VERSION:2.0\r\n";
-echo "PRODID:-//University Module System//EN\r\n";
+echo "PRODID:-//Term Planner//EN\r\n";
 echo "CALSCALE:GREGORIAN\r\n";
 
 foreach ($data['modules'] as $mod) {

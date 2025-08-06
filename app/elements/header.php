@@ -1,5 +1,5 @@
 <div class="header-title">
-  <h1>University Module Support System</h1>
+  <h1>Term Planner</h1>
 
   <input type="checkbox" id="menu-toggle" hidden>
 

@@ -329,6 +329,41 @@ if (!empty($data['modules'])) {
             <?php echo htmlspecialchars(getAverageGrade($data['modules'])); ?>
         </p>
         <br />
+        
+        <?php if ($isEditMode): ?>
+            <!-- EDIT MODE: Add module form -->
+            <h2>Add a New Module</h2>
+            <form method="post">
+                <table style='border-collapse: collapse;'>
+                    <tr>
+                        <td style='padding: 4px 10px;'>
+                            <label for="add_module_name">Module Name:</label>
+                        </td>
+                        <td style='padding: 4px 10px;'>
+                            <input id="add_module_name" type="text" name="moduleName" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 4px 10px;'>
+                            <label for="add_module_ideal_term">Ideal Term:</label>
+                        </td>
+                        <td style='padding: 4px 10px;'>
+                            <input id="add_module_ideal_term" type="number" name="idealTerm" value="1" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 4px 10px;'>
+                            <label for="add_module_assigned_term">Assign to Term:</label>
+                        </td>
+                        <td style='padding: 4px 10px;'>
+                            <input id="add_module_assigned_term" type="number" name="assignedTerm" value="1" required />
+                        </td>
+                    </tr>
+                </table>
+                <button type="submit" name="add_module">Add Module</button>
+            </form>
+            <hr />
+        <?php endif; ?>
 
         <?php
         // Display the modules by chosen "display term" (assigned vs ideal)
@@ -441,11 +476,22 @@ if (!empty($data['modules'])) {
                     }
 
                     echo "<br />";
-                    echo "Ideal Term: " . (int) $mod['idealTerm'];
+                    // echo "Ideal Term: " . (int) $mod['idealTerm'];
 
                     if ($isEditMode) {
                         echo "<br /><br />";
                         ?>
+                        <!-- change ideal term -->
+                        <form method="post" class="form-inline">
+                            <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">
+                            <label>Ideal Term:
+                                <input type="number" name="newIdealTerm" value="<?php echo (int) $mod['idealTerm']; ?>"
+                                    style="width:60px;" required>
+                            </label>
+                            <button type="submit" name="set_ideal_term">Save</button>
+                        </form>
+                        <br />
+
                         <!-- give optional id to module -->
                         <form method="post" class="form-inline">
                             <input type="hidden" name="moduleIndex" value="<?php echo $mIndex; ?>">

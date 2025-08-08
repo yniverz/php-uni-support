@@ -110,6 +110,18 @@ if ($isEditMode) {
         exit;
     }
 
+    else if (isset($_POST['set_ideal_term'])) {
+        $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
+        $newIdealTerm = (int) ($_POST['newIdealTerm'] ?? 1);
+        if ($moduleIndex >= 0 && isset($data['modules'][$moduleIndex])) {
+            $data['modules'][$moduleIndex]['idealTerm'] = $newIdealTerm;
+            sortModules($data['modules']);
+            saveData($data, $jsonFile);
+        }
+        header("Location: index.php?mode=edit");
+        exit;
+    }
+
     else if (isset($_POST['new_module_name'])) {
         $moduleIndex = (int) ($_POST['moduleIndex'] ?? -1);
         $newName = trim($_POST['new_module_name'] ?? '');

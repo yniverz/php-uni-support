@@ -3,6 +3,8 @@
 #   - Denies direct access to the /app/ folder (returns 404).
 #   - Ensures index.php is the default directory index if needed.
 
+DirectorySlash Off
+
 # Turn on rewriting engine
 RewriteEngine On
 

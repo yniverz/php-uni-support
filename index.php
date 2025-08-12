@@ -241,6 +241,8 @@ if (!empty($data['modules'])) {
 
         })();
     </script>
+
+    <?php include __DIR__ . '/app/elements/head.php'; ?>
 </head>
 
 <body>

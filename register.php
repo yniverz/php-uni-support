@@ -24,6 +24,8 @@ if (isset($_POST['register_submit'])) {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
     $password2 = trim($_POST['password2'] ?? '');
+    // NEW: read checkbox
+    $acceptedTerms = isset($_POST['accept_terms']) && $_POST['accept_terms'] === '1';
 
     // 1) Check if username is empty
     if ($username === '') {
@@ -43,7 +45,12 @@ if (isset($_POST['register_submit'])) {
     }
     elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
         $registerError = "Username can only contain letters, numbers, and underscores.";
-    } else {
+    }
+    // NEW: Must accept AGB & cookies
+    elseif (!$acceptedTerms) {
+        $registerError = "You must accept the AGB and Cookies notice to create an account.";
+    }
+    else {
         // 5) If all checks pass, hash the password and store it
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
@@ -54,6 +61,7 @@ if (isset($_POST['register_submit'])) {
         $userData[$username] = [
             'userid' => $newUserID,
             'password' => $hashedPassword
+            // Intentionally not storing consent metadata per your request
         ];
 
         saveData($userData, $userDataFile);
@@ -86,7 +94,7 @@ if (isset($_POST['register_submit'])) {
             <!-- Show the Registration Form -->
             <form method="post" action="">
                 <label>Username:
-                    <input type="text" name="username" required>
+                    <input type="text" name="username" required value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : '' ; ?>">
                 </label>
                 <label>Password:
                     <input type="password" name="password" required>
@@ -94,6 +102,35 @@ if (isset($_POST['register_submit'])) {
                 <label>Confirm Password:
                     <input type="password" name="password2" required>
                 </label>
+
+                <!-- NEW: Consent checkbox (client-side required) -->
+                <div class="consent-block" style="margin: 0.75rem 0;">
+                    <label style="display:flex;align-items:flex-start;gap:0.5rem;">
+                        <input
+                            type="checkbox"
+                            name="accept_terms"
+                            value="1"
+                            required
+                            <?php echo isset($_POST['accept_terms']) && $_POST['accept_terms'] === '1' ? 'checked' : ''; ?>
+                        >
+                        <span>
+                            I have read and accept the
+                            <a href="/legal/terms-and-cookies.html" target="_blank" rel="noopener">
+                                AGB & Cookies Policy
+                            </a>.
+                        </span>
+                    </label>
+                    <!-- Small explanatory text + link -->
+                    <small style="display:block;color:#666;margin-top:0.25rem;line-height:1.4;">
+                        By creating an account you agree that this service uses cookies necessary for operation.
+                        We may also use Microsoft services (e.g., hosting/analytics) that may set cookies.
+                        Details are in our
+                        <a href="/legal/terms-and-cookies.html" target="_blank" rel="noopener">
+                            Terms & Cookies Policy
+                        </a>.
+                    </small>
+                </div>
+
                 <button type="submit" name="register_submit">Register</button>
             </form>
             <p>Already have an account? <a href="login.php">Login here</a></p>

@@ -124,6 +124,7 @@ $sharedGradeDatasets = buildSharedGradeDatasets($showShared, $userData, $myExamC
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-trendline/dist/chartjs-plugin-trendline.min.js"></script>
+    <?php include __DIR__ . '/app/elements/head.php'; ?>
 </head>
 
 <body>

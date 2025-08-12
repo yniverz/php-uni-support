@@ -4,9 +4,11 @@
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
 # App Specific files
-app/users.json
-app/global_module_ids.json
-app/users/
+/app/users.json
+/app/global_module_ids.json
+/app/users/
+/app/elements/ms-clarity.php
+
 
 # Apple files
 .DS_Store

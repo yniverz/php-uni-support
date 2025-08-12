@@ -18,6 +18,7 @@ $modules = $data['modules'] ?? [];
     <meta charset="utf-8">
     <title>Term Planner</title>
     <link rel="stylesheet" href="css/style.css">
+    <?php include __DIR__ . '/app/elements/head.php'; ?>
 </head>
 
 <body>

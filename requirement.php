@@ -182,6 +182,7 @@ $prefillCredits     = isset($_POST['update_main']) ? ($_POST['credits'] ?? $req[
         .errors ul { margin:6px 0 0 18px; }
         .save-row { margin: 12px 0 18px; }
     </style>
+    <?php include __DIR__ . '/app/elements/head.php'; ?>
 </head>
 
 <body>

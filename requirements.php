@@ -305,6 +305,7 @@ if (!empty($reqOptions)) {
             opacity: 0.6;
         }
     </style>
+    <?php include __DIR__ . '/app/elements/head.php'; ?>
 </head>
 
 <body>

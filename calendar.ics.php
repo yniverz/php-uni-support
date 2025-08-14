@@ -64,7 +64,7 @@ foreach ($data['modules'] as $mod) {
             $credits = $req['credits'];
             $date = $req['date']; // YYYY-MM-DD
 
-            $summary = "$moduleName: $desc ($credits cr)";
+            $summary = "$desc, $moduleName ($credits cr)";
             $uid = generateUID($moduleName, $desc, $credits, $date);
             $dt = formatDateICS($date);
 

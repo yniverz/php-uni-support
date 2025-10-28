@@ -686,6 +686,15 @@ if (!empty($data['modules'])) {
                     echo "</div>"; // end module-card
                 }
 
+                // Term grade averages (use display modules so ideal/assigned view matches)
+                $avgThisTerm = getAverageGradeForTerm($modulesForDisplay, $termNumber);
+                $avgUpToTerm = getAverageGradeUpToTerm($modulesForDisplay, $termNumber);
+
+                echo "<div class='grade-summary'>";
+                echo "<p class='info-line'><strong>Average Grade This Term:</strong> " . htmlspecialchars($avgThisTerm) . "</p>";
+                echo "<p class='info-line'><strong>Average Grade Up To " . htmlspecialchars($termLabel) . ":</strong> " . htmlspecialchars($avgUpToTerm) . "</p>";
+                echo "</div>";
+
                 // Use display modules for the cumulative credit summaries as well
                 $haveCreditsSoFar = getCompletedCreditsUpToTerm($modulesForDisplay, $termNumber);
                 $wantCreditsSoFar = getAllCreditsUpToTerm($modulesForDisplay, $termNumber);

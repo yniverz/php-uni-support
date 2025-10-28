@@ -31,6 +31,54 @@ function getAverageGrade($modules)
     return ($totalCredits > 0) ? round($totalGradePoints / $totalCredits, 2) : 0;
 }
 
+/**
+ * Compute the weighted average grade for all finished exams in a specific term.
+ * Uses the module's 'term' field for filtering (works with display copies too).
+ */
+function getAverageGradeForTerm(array $modules, int $termNumber)
+{
+    $totalCredits = 0.0;
+    $totalGradePoints = 0.0;
+
+    foreach ($modules as $module) {
+        if ((int)($module['term'] ?? 0) !== $termNumber) continue;
+        foreach ($module['requirements'] as $req) {
+            $credits = (float)($req['credits'] ?? 0);
+            $grade   = isset($req['grade']) ? (float)$req['grade'] : null;
+            if ($credits > 0 && $grade !== null && !empty($req['done'])) {
+                $totalCredits     += $credits;
+                $totalGradePoints += $grade * $credits;
+            }
+        }
+    }
+
+    return ($totalCredits > 0) ? round($totalGradePoints / $totalCredits, 2) : 0;
+}
+
+/**
+ * Compute the weighted average grade for all finished exams up to and including a term.
+ * Uses the module's 'term' field for filtering (works with display copies too).
+ */
+function getAverageGradeUpToTerm(array $modules, int $termNumber)
+{
+    $totalCredits = 0.0;
+    $totalGradePoints = 0.0;
+
+    foreach ($modules as $module) {
+        if ((int)($module['term'] ?? 0) > $termNumber) continue;
+        foreach ($module['requirements'] as $req) {
+            $credits = (float)($req['credits'] ?? 0);
+            $grade   = isset($req['grade']) ? (float)$req['grade'] : null;
+            if ($credits > 0 && $grade !== null && !empty($req['done'])) {
+                $totalCredits     += $credits;
+                $totalGradePoints += $grade * $credits;
+            }
+        }
+    }
+
+    return ($totalCredits > 0) ? round($totalGradePoints / $totalCredits, 2) : 0;
+}
+
 function getTotalCreditsSoFar($modules)
 {
     $total = 0;

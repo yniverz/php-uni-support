@@ -689,10 +689,35 @@ if (!empty($data['modules'])) {
                 // Term grade averages (use display modules so ideal/assigned view matches)
                 $avgThisTerm = getAverageGradeForTerm($modulesForDisplay, $termNumber);
                 $avgUpToTerm = getAverageGradeUpToTerm($modulesForDisplay, $termNumber);
+                $prevTerm = $termNumber - 1;
+                $prevTermAvg = ($prevTerm >= 1) ? getAverageGradeForTerm($modulesForDisplay, $prevTerm) : 0;
+                $prevUpToAvg = ($prevTerm >= 1) ? getAverageGradeUpToTerm($modulesForDisplay, $prevTerm) : 0;
+
+                // Define deltas: positive means improvement (lower grade value is better, hence prev - current)
+                $deltaThisTerm = ($avgThisTerm > 0 && $prevTermAvg > 0) ? round($prevTermAvg - $avgThisTerm, 2) : 0.0;
+                $deltaUpTo     = ($avgUpToTerm > 0 && $prevUpToAvg > 0) ? round($prevUpToAvg - $avgUpToTerm, 2) : 0.0;
+
+                // Format delta with +/− sign and 1 or 2 decimals: show 2 decimals only if the second digit is non-zero
+                $formatDelta = function (float $v): string {
+                    $v2   = round($v, 2);
+                    $sign = ($v2 >= 0) ? '+' : '-';
+                    $abs  = abs($v2);
+                    $s2   = number_format($abs, 2, '.', '');
+                    if (substr($s2, -1) === '0') {
+                        $s1 = number_format($abs, 1, '.', '');
+                        return $sign . $s1;
+                    }
+                    return $sign . $s2;
+                };
+
+                $deltaThisTermStr = $formatDelta($deltaThisTerm);
+                $deltaUpToStr     = $formatDelta($deltaUpTo);
+                $deltaThisTermColor = ($deltaThisTerm > 0) ? 'green' : (($deltaThisTerm < 0) ? 'red' : 'inherit');
+                $deltaUpToColor     = ($deltaUpTo > 0) ? 'green' : (($deltaUpTo < 0) ? 'red' : 'inherit');
 
                 echo "<div class='grade-summary'>";
-                echo "<p class='info-line'><strong>Average Grade This Term:</strong> " . htmlspecialchars($avgThisTerm) . "</p>";
-                echo "<p class='info-line'><strong>Average Grade Up To " . htmlspecialchars($termLabel) . ":</strong> " . htmlspecialchars($avgUpToTerm) . "</p>";
+                echo "<p class='info-line'><strong>Average Grade This Term:</strong> " . htmlspecialchars($avgThisTerm) . " <span style=\"color: $deltaThisTermColor;\">($deltaThisTermStr)</span></p>";
+                echo "<p class='info-line'><strong>Average Grade Up To " . htmlspecialchars($termLabel) . ":</strong> " . htmlspecialchars($avgUpToTerm) . " <span style=\"color: $deltaUpToColor;\">($deltaUpToStr)</span></p>";
                 echo "</div>";
 
                 // Use display modules for the cumulative credit summaries as well
